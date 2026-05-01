@@ -1,4 +1,5 @@
 import { DayView } from "../../components/DayView";
+import { NotebookShell } from "../../components/NotebookShell";
 import Link from "next/link";
 import "../../notebook.css";
 
@@ -33,25 +34,10 @@ export default async function DayPage({ params }: DayPageProps) {
 
   const todayDate = getToday();
   const isToday = date === todayDate;
-  const [yy, mm] = date.split("-").map(Number);
 
   return (
-    <div className="notebook-page">
-      <div className="notebook">
-        <nav className="notebook-nav">
-          <div className="nav-title">&mdash; habit journal &middot; {yy} &mdash;</div>
-          <div className="nav-tabs">
-            <Link href="/" className="nav-tab">
-              Today
-            </Link>
-            <Link href={`/calendar?ym=${yy}-${String(mm).padStart(2, "0")}`} className="nav-tab active">
-              Calendar
-            </Link>
-          </div>
-        </nav>
-
-        <DayView date={date} isToday={isToday} />
-      </div>
-    </div>
+    <NotebookShell>
+      <DayView date={date} isToday={isToday} />
+    </NotebookShell>
   );
 }

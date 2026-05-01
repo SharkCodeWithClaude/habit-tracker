@@ -9,6 +9,11 @@ const CalendarView = ({ habits, logs, ink, todayKey }) => {
   const [viewYear, setViewYear] = React.useState(today.getFullYear());
   const [flipDir, setFlipDir] = React.useState(0);
   const [flipping, setFlipping] = React.useState(false);
+  const [monthsToShow, setMonthsToShow] = React.useState(4);
+
+  const MONTH_OPTIONS = [2, 3, 4, 6, 9, 12];
+  // ~4.345 weeks per month — round up so the requested span is fully covered
+  const cols = Math.ceil(monthsToShow * 4.345);
 
   const flip = (dir) => {
     if (flipping) return;
@@ -31,7 +36,6 @@ const CalendarView = ({ habits, logs, ink, todayKey }) => {
   const buildHeatmap = (habitId) => {
     const cells = [];
     const end = new Date(_tyy, _tmm - 1, _tdd);
-    const cols = 18;
     const startDay = new Date(end);
     startDay.setDate(startDay.getDate() - (cols * 7) + 1);
     while (startDay.getDay() !== 0) startDay.setDate(startDay.getDate() - 1);
@@ -167,14 +171,28 @@ const CalendarView = ({ habits, logs, ink, todayKey }) => {
       </div>
 
       <div className="page page-right">
-        <div className="block-label" style={{ marginBottom: 14 }}>
-          <span className="prompt-arrow">→</span> Last 18 weeks
-          <span className="label-meta">heatmap by habit</span>
+        <div className="block-label" style={{ marginBottom: 10 }}>
+          <span className="prompt-arrow">→</span> Last {monthsToShow} month{monthsToShow !== 1 ? 's' : ''}
+          <span className="label-meta">filled = done · empty = missed</span>
+        </div>
+        <div className="months-filter">
+          <span className="months-filter-label">show:</span>
+          {MONTH_OPTIONS.map((n) => (
+            <button
+              key={n}
+              className={`months-chip ${monthsToShow === n ? 'active' : ''}`}
+              onClick={() => setMonthsToShow(n)}
+            >
+              {n}m
+            </button>
+          ))}
         </div>
         <div className="heatmap-list">
           {habits.map((h, hi) => {
             const cells = buildHeatmap(h.id);
             const stat = habitStats.find((s) => s.id === h.id);
+            // build month-tick row from first row of cells
+            const monthTicks = cells.map((wk) => wk[0].date.getMonth());
             return (
               <div key={h.id} className="heatmap-row">
                 <div className="heatmap-row-head">
@@ -187,29 +205,47 @@ const CalendarView = ({ habits, logs, ink, todayKey }) => {
                     <span><b>{stat.bestStreak}</b><i>best</i></span>
                   </div>
                 </div>
-                <div className="heatmap-grid">
-                  {cells.map((week, ci) => (
-                    <div key={ci} className="heatmap-col">
-                      {week.map((cell, ri) => (
-                        <div key={ri} className={`hm-cell ${!cell.past ? 'future' : ''} ${cell.has ? 'done' : ''}`}>
-                          {cell.past && cell.has && (
-                            <InkDot intensity={1} size={11} ink={ink} seed={hi * 7 + ci * 3 + ri} />
-                          )}
-                          {cell.past && !cell.has && (
-                            <div className="hm-empty-dot" style={{ background: ink + '15' }} />
-                          )}
+                <div className="heatmap-body">
+                  <div className="heatmap-day-labels">
+                    {['S','M','T','W','T','F','S'].map((d, i) => (
+                      <div key={i} className="hm-day-label">{(i % 2 === 1) ? d : ''}</div>
+                    ))}
+                  </div>
+                  <div className="heatmap-grid-wrap">
+                    <div className="heatmap-month-row" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
+                      {monthTicks.map((m, ci) => {
+                        const showLabel = ci === 0 || monthTicks[ci - 1] !== m;
+                        const monthShort = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m];
+                        return (
+                          <div key={ci} className="hm-month-tick">
+                            {showLabel ? monthShort : ''}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="heatmap-grid" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
+                      {cells.map((week, ci) => (
+                        <div key={ci} className="heatmap-col">
+                          {week.map((cell, ri) => (
+                            <div
+                              key={ri}
+                              className={`hm-cell ${!cell.past ? 'future' : ''} ${cell.has ? 'done' : ''}`}
+                              style={cell.past && cell.has ? { background: ink, borderColor: ink } : {}}
+                              title={`${cell.key} — ${cell.has ? 'done' : (cell.past ? 'missed' : 'future')}`}
+                            />
+                          ))}
                         </div>
                       ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
         <div className="heatmap-axis">
-          <span>~4 months ago</span>
-          <span>today</span>
+          <span>~{monthsToShow} month{monthsToShow !== 1 ? 's' : ''} ago</span>
+          <span>today →</span>
         </div>
       </div>
     </div>

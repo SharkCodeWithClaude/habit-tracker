@@ -10,6 +10,7 @@ function getToday(): string {
 function revalidateAll(date: string) {
   revalidatePath("/");
   revalidatePath("/calendar");
+  revalidatePath("/review");
   revalidatePath(`/day/${date}`);
 }
 
@@ -31,20 +32,10 @@ export async function saveIntention(intention: string, date?: string) {
   revalidateAll(d);
 }
 
-export async function createHabit(formData: FormData) {
-  const name = formData.get("name") as string;
-  if (!name?.trim()) return;
-  storage.createHabit(name.trim());
-  revalidatePath("/");
-  revalidatePath("/manage");
-  revalidatePath("/calendar");
-}
-
 export async function createHabitInline(name: string) {
   if (!name?.trim()) return;
   storage.createHabit(name.trim());
-  revalidatePath("/");
-  revalidatePath("/calendar");
+  revalidateAll(getToday());
 }
 
 export async function updateHabitName(habitId: number, name: string) {
@@ -54,14 +45,15 @@ export async function updateHabitName(habitId: number, name: string) {
   } else {
     storage.updateHabitName(habitId, trimmed);
   }
-  revalidatePath("/");
-  revalidatePath("/manage");
-  revalidatePath("/calendar");
+  revalidateAll(getToday());
 }
 
 export async function archiveHabit(habitId: number) {
   storage.archiveHabit(habitId);
-  revalidatePath("/");
-  revalidatePath("/manage");
-  revalidatePath("/calendar");
+  revalidateAll(getToday());
+}
+
+export async function saveReflection(weekEnd: string, reflection: string) {
+  storage.saveReflection(weekEnd, reflection);
+  revalidatePath("/review");
 }

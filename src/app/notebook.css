@@ -16,6 +16,15 @@
   to { stroke-dashoffset: 0; }
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.notebook > *:not(.notebook-nav) {
+  animation: fadeIn 0.2s ease-out;
+}
+
 @keyframes strikeDraw {
   from { transform: scaleX(0) rotate(-1deg); }
   to { transform: scaleX(1) rotate(-1deg); }

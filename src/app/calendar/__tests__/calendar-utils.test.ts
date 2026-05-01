@@ -44,6 +44,7 @@ describe("buildCalendarGrid", () => {
     Array.from({ length: count }, (_, i) => ({
       date: `2026-05-${String(i + 1).padStart(2, "0")}`,
       note: "",
+      intention: "",
       habits: [],
     }));
 
@@ -86,6 +87,7 @@ describe("buildCalendarGrid", () => {
     const febDays: DayRecord[] = Array.from({ length: 28 }, (_, i) => ({
       date: `2027-02-${String(i + 1).padStart(2, "0")}`,
       note: "",
+      intention: "",
       habits: [],
     }));
     const grid = buildCalendarGrid(2027, 2, febDays);

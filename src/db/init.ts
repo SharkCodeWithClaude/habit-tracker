@@ -24,6 +24,12 @@ CREATE TABLE IF NOT EXISTS day_notes (
   intention  TEXT NOT NULL DEFAULT '',
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS weekly_reviews (
+  week_end   TEXT PRIMARY KEY,
+  reflection TEXT NOT NULL DEFAULT '',
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 `;
 
 const DB_PATH = path.join(process.cwd(), "data", "habits.db");

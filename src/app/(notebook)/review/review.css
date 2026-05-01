@@ -1,0 +1,192 @@
+/* ===== Review summary cards ===== */
+.review-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 8px;
+}
+
+.review-stat-big {
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.4);
+  transform: rotate(-0.3deg);
+}
+
+.review-stat-big:nth-child(2) { transform: rotate(0.4deg); }
+.review-stat-big:nth-child(3) { transform: rotate(-0.2deg); }
+.review-stat-big:nth-child(4) { transform: rotate(0.5deg); }
+
+.rs-num {
+  font-family: var(--font-caveat), cursive;
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.rs-num.small {
+  font-size: 22px;
+  line-height: 1.1;
+}
+
+.rs-pct {
+  font-family: var(--font-caveat), cursive;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  margin-left: 2px;
+}
+
+.rs-label {
+  font-family: var(--font-kalam), sans-serif;
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 6px;
+  line-height: 1.3;
+  font-style: italic;
+}
+
+/* ===== Week strip ===== */
+.week-strip {
+  margin-bottom: 28px;
+}
+
+.week-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.week-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 4px 10px;
+  border-radius: 4px;
+  position: relative;
+}
+
+.week-day.today {
+  background: rgba(244, 215, 92, 0.35);
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+  border-radius: 6px;
+}
+
+.week-letter {
+  font-family: var(--font-caveat), cursive;
+  font-size: 14px;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.week-date {
+  font-family: var(--font-caveat), cursive;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.week-track {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.week-tick {
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.week-empty {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--rule);
+}
+
+/* ===== Per-habit bars ===== */
+.review-block {
+  margin-bottom: 28px;
+}
+
+.review-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.review-row {
+  display: grid;
+  grid-template-columns: 130px 1fr 40px;
+  align-items: center;
+  gap: 12px;
+}
+
+.review-name {
+  font-family: var(--font-kalam), sans-serif;
+  font-size: 15px;
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+}
+
+.review-bar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+  height: 18px;
+  border-bottom: 1.5px solid var(--ink);
+}
+
+.review-pip {
+  border-left: 1px solid var(--rule);
+  position: relative;
+  overflow: hidden;
+}
+
+.review-pip:first-child { border-left: none; }
+
+.review-count {
+  font-family: var(--font-caveat), cursive;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: right;
+}
+
+/* ===== Reflection ===== */
+.review-prompt {
+  margin-top: 28px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 880px) {
+  .review-summary {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .review-row {
+    grid-template-columns: 100px 1fr 32px;
+    gap: 8px;
+  }
+
+  .review-name { font-size: 13px; }
+  .week-letter { font-size: 11px; }
+  .week-date { font-size: 18px; }
+}
+
+@media (max-width: 480px) {
+  .week-track { gap: 2px; }
+  .week-tick { width: 10px; height: 10px; }
+  .rs-num { font-size: 32px; }
+}
