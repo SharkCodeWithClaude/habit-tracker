@@ -118,7 +118,11 @@ export function MonthGrid({ year, month, days, habits, todayDate }: MonthGridPro
               return (
                 <div
                   key={cell.date}
-                  className={`month-cell ${isToday ? "is-today" : ""} ${isFuture ? "is-future" : ""}`}
+                  className={`month-cell ${isToday ? "is-today" : ""} ${isFuture ? "is-future" : ""} ${!isFuture ? "clickable" : ""}`}
+                  onClick={!isFuture ? () => router.push(`/day/${cell.date}`) : undefined}
+                  role={!isFuture ? "button" : undefined}
+                  tabIndex={!isFuture ? 0 : undefined}
+                  onKeyDown={!isFuture ? (e) => { if (e.key === "Enter") router.push(`/day/${cell.date}`); } : undefined}
                 >
                   <div className="month-cell-num">
                     {parseInt(cell.date.split("-")[2], 10)}

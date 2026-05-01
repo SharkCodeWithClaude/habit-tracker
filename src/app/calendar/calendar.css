@@ -120,6 +120,15 @@
   opacity: 0.4;
 }
 
+.month-cell.clickable {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.month-cell.clickable:hover {
+  background: var(--paper-shade);
+}
+
 .month-cell-num {
   font-family: var(--font-caveat), cursive;
   font-size: 18px;

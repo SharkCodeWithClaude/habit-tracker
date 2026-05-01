@@ -184,6 +184,23 @@
   font-style: italic;
 }
 
+/* ===== Day back link ===== */
+.day-back-link {
+  margin-bottom: 18px;
+}
+
+.day-back-link a {
+  font-family: var(--font-caveat), cursive;
+  font-size: 18px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.day-back-link a:hover {
+  color: var(--ink);
+}
+
 /* ===== Intention ===== */
 .intention-block {
   margin-bottom: 30px;

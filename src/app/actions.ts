@@ -7,23 +7,28 @@ function getToday(): string {
   return new Date().toISOString().split("T")[0];
 }
 
+function revalidateAll(date: string) {
+  revalidatePath("/");
+  revalidatePath("/calendar");
+  revalidatePath(`/day/${date}`);
+}
+
 export async function toggleHabit(habitId: number, date?: string) {
   const d = date ?? getToday();
   storage.toggleHabitForDate(habitId, d);
-  revalidatePath("/");
-  revalidatePath("/calendar");
+  revalidateAll(d);
 }
 
 export async function saveNote(note: string, date?: string) {
   const d = date ?? getToday();
   storage.setDayNote(d, note);
-  revalidatePath("/");
+  revalidateAll(d);
 }
 
 export async function saveIntention(intention: string, date?: string) {
   const d = date ?? getToday();
   storage.setDayIntention(d, intention);
-  revalidatePath("/");
+  revalidateAll(d);
 }
 
 export async function createHabit(formData: FormData) {
@@ -32,10 +37,12 @@ export async function createHabit(formData: FormData) {
   storage.createHabit(name.trim());
   revalidatePath("/");
   revalidatePath("/manage");
+  revalidatePath("/calendar");
 }
 
 export async function archiveHabit(habitId: number) {
   storage.archiveHabit(habitId);
   revalidatePath("/");
   revalidatePath("/manage");
+  revalidatePath("/calendar");
 }
