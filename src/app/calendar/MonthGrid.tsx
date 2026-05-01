@@ -11,6 +11,7 @@ import {
 } from "./calendar-utils";
 import type { DayRecord } from "@/db/types";
 import type { Habit } from "@/db/types";
+import { habitColor } from "../habit-colors";
 
 interface MonthGridProps {
   year: number;
@@ -133,6 +134,7 @@ export function MonthGrid({ year, month, days, habits, todayDate }: MonthGridPro
                         <div
                           key={h.id}
                           className={`mc-pip ${h.done ? "done" : ""}`}
+                          style={h.done ? { background: habitColor(h.id) } : undefined}
                         />
                       ))}
                     </div>
@@ -166,7 +168,7 @@ export function MonthGrid({ year, month, days, habits, todayDate }: MonthGridPro
       <div className="month-legend">
         {habits.map((h) => (
           <div key={h.id} className="legend-item">
-            <span className="legend-pip" />
+            <span className="legend-pip" style={{ background: habitColor(h.id) }} />
             <span className="legend-name">{h.name}</span>
           </div>
         ))}

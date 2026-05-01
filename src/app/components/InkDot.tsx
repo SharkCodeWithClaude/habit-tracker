@@ -1,6 +1,7 @@
 interface InkDotProps {
   size?: number;
   seed?: number;
+  color?: string;
 }
 
 function wobble(seed: number, n: number): number {
@@ -8,7 +9,7 @@ function wobble(seed: number, n: number): number {
   return (x - Math.floor(x) - 0.5) * 1.5;
 }
 
-export function InkDot({ size = 11, seed = 0 }: InkDotProps) {
+export function InkDot({ size = 11, seed = 0, color = "var(--ink, #161a2c)" }: InkDotProps) {
   const r = size * 0.28 * (0.7 + 0.45);
   const cx = size / 2 + wobble(seed, 1);
   const cy = size / 2 + wobble(seed, 2);
@@ -19,14 +20,14 @@ export function InkDot({ size = 11, seed = 0 }: InkDotProps) {
         cx={cx}
         cy={cy}
         r={r}
-        fill="var(--ink, #161a2c)"
+        fill={color}
         opacity={0.9}
       />
       <circle
         cx={size / 2 + wobble(seed, 3) + 0.5}
         cy={size / 2 + wobble(seed, 4) - 0.5}
         r={r * 0.55}
-        fill="var(--ink, #161a2c)"
+        fill={color}
         opacity={0.4}
       />
     </svg>

@@ -34,7 +34,7 @@ async function CalendarContent({ searchParams }: CalendarPageProps) {
           todayDate={todayDate}
         />
       </div>
-      <HeatmapSection todayDate={todayDate} />
+      <HeatmapSection todayDate={todayDate} rows={storage.getHeatmapData(52)} />
     </div>
   );
 }

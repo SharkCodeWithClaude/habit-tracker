@@ -1,6 +1,7 @@
 import { storage } from "@/db/storage";
 import { Scribble } from "../../components/Scribble";
 import { ReflectionTextarea } from "../../components/ReflectionTextarea";
+import { habitColor } from "../../habit-colors";
 import "./review.css";
 
 export const dynamic = "force-dynamic";
@@ -102,7 +103,7 @@ export default function ReviewPage() {
                             <svg width="10" height="10" viewBox="0 0 10 10">
                               <path
                                 d="M 1.5 5 L 4 7.5 L 8.5 2"
-                                stroke="var(--ink, #161a2c)"
+                                stroke={habitColor(h.habitId)}
                                 strokeWidth="1.6"
                                 fill="none"
                                 strokeLinecap="round"
@@ -128,7 +129,7 @@ export default function ReviewPage() {
               {review.habits.map((h) => (
                 <div key={h.habitId} className="review-row">
                   <span className="review-name">
-                    <span className="cat-dot" style={{ marginRight: 6 }} />
+                    <span className="cat-dot" style={{ background: habitColor(h.habitId), marginRight: 6 }} />
                     {h.habitName}
                   </span>
                   <div className="review-bar">
@@ -146,7 +147,7 @@ export default function ReviewPage() {
                           >
                             <path
                               d={`M 1 ${4 + (i % 2)} L 13 ${4 + ((i + 1) % 2)} L 13 12 L 1 12 Z`}
-                              fill="var(--ink, #161a2c)"
+                              fill={habitColor(h.habitId)}
                               opacity="0.85"
                             />
                           </svg>
