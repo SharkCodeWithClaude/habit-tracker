@@ -323,16 +323,58 @@
   font-size: 16px;
 }
 
-.add-habit-row a {
-  opacity: 0.5;
-  font-style: italic;
-  color: var(--ink);
-  text-decoration: none;
+.add-habit-row {
+  cursor: pointer;
+}
+
+.add-habit-row span[style] {
   transition: opacity 0.15s;
 }
 
-.add-habit-row a:hover {
-  opacity: 0.8;
+.add-habit-row:hover span {
+  opacity: 0.8 !important;
+}
+
+.add-habit-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px dashed var(--rule);
+  font-family: var(--font-kalam), sans-serif;
+  font-size: 19px;
+  font-weight: 400;
+  color: var(--ink);
+  outline: none;
+  padding: 2px 0;
+  width: 100%;
+}
+
+.add-habit-input::placeholder {
+  color: var(--ink-soft);
+  opacity: 0.5;
+  font-style: italic;
+}
+
+/* Editable habit name */
+.habit-name-input {
+  background: transparent;
+  border: none;
+  font-family: var(--font-kalam), sans-serif;
+  font-size: 19px;
+  font-weight: 400;
+  color: var(--ink);
+  outline: none;
+  padding: 0;
+  width: 100%;
+  transition: border-bottom 0.15s;
+  border-bottom: 1.5px solid transparent;
+}
+
+.habit-name-input:focus {
+  border-bottom: 1.5px dashed var(--rule);
+}
+
+.habit-row.done .habit-name-input {
+  opacity: 0.55;
 }
 
 /* ===== Notes ===== */

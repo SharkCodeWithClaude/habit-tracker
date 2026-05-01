@@ -40,6 +40,25 @@ export async function createHabit(formData: FormData) {
   revalidatePath("/calendar");
 }
 
+export async function createHabitInline(name: string) {
+  if (!name?.trim()) return;
+  storage.createHabit(name.trim());
+  revalidatePath("/");
+  revalidatePath("/calendar");
+}
+
+export async function updateHabitName(habitId: number, name: string) {
+  const trimmed = name.trim();
+  if (!trimmed) {
+    storage.archiveHabit(habitId);
+  } else {
+    storage.updateHabitName(habitId, trimmed);
+  }
+  revalidatePath("/");
+  revalidatePath("/manage");
+  revalidatePath("/calendar");
+}
+
 export async function archiveHabit(habitId: number) {
   storage.archiveHabit(habitId);
   revalidatePath("/");

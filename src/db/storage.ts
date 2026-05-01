@@ -35,6 +35,12 @@ export class HabitStorage {
       .run(id);
   }
 
+  updateHabitName(id: number, name: string): void {
+    this.db
+      .prepare("UPDATE habits SET name = ? WHERE id = ?")
+      .run(name, id);
+  }
+
   toggleHabitForDate(habitId: number, date: string): boolean {
     const existing = this.db
       .prepare("SELECT 1 FROM habit_logs WHERE habit_id = ? AND date = ?")

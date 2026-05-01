@@ -1,5 +1,7 @@
 import { storage } from "@/db/storage";
 import { InkCheckbox } from "./InkCheckbox";
+import { EditableHabitName } from "./EditableHabitName";
+import { AddHabitInline } from "./AddHabitInline";
 import { IntentionTextarea } from "./IntentionTextarea";
 import { NoteTextarea } from "./NoteTextarea";
 import { Scribble } from "./Scribble";
@@ -58,8 +60,7 @@ export function DayView({ date, isToday = false }: DayViewProps) {
 
             {day.habits.length === 0 ? (
               <div className="empty-state">
-                No habits yet.{" "}
-                <Link href="/manage">Add your first habit</Link>
+                No habits yet — use the + below to add one
               </div>
             ) : (
               <div className="habit-list">
@@ -77,10 +78,11 @@ export function DayView({ date, isToday = false }: DayViewProps) {
                         size={26}
                         seed={i + 1}
                       />
-                      <div className="habit-name-wrap">
-                        <span className="habit-name">{habit.name}</span>
-                        {habit.done && <span className="habit-strikethrough" />}
-                      </div>
+                      <EditableHabitName
+                        habitId={habit.id}
+                        name={habit.name}
+                        done={habit.done}
+                      />
                       <div className="habit-meta">
                         {streak > 0 && (
                           <span className="streak">
@@ -95,14 +97,7 @@ export function DayView({ date, isToday = false }: DayViewProps) {
               </div>
             )}
 
-            {isToday && (
-              <div className="add-habit-row">
-                <span className="prompt-arrow" style={{ opacity: 0.4 }}>
-                  +
-                </span>
-                <Link href="/manage">add another habit...</Link>
-              </div>
-            )}
+            <AddHabitInline />
           </div>
 
           <NoteTextarea defaultValue={day.note} date={date} />
