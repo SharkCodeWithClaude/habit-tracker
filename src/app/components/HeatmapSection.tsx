@@ -1,21 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { InkDot } from "./InkDot";
 import { habitColor } from "../habit-colors";
 import type { HabitHeatmapRow } from "@/db/types";
 
-const FILTERS = [
-  { label: "1m", weeks: 4 },
-  { label: "2m", weeks: 9 },
-  { label: "3m", weeks: 13 },
-  { label: "6m", weeks: 26 },
-  { label: "9m", weeks: 39 },
-  { label: "12m", weeks: 52 },
-];
+const MONTH_OPTIONS = [2, 3, 4, 6, 9, 12];
+const MONTH_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
 function isFuture(dateStr: string, todayStr: string): boolean {
   return dateStr > todayStr;
+}
+
+function getMonth(dateStr: string): number {
+  return parseInt(dateStr.split("-")[1], 10) - 1;
 }
 
 interface HeatmapSectionProps {
@@ -24,39 +22,43 @@ interface HeatmapSectionProps {
 }
 
 export function HeatmapSection({ todayDate, rows }: HeatmapSectionProps) {
-  const [selectedWeeks, setSelectedWeeks] = useState(13);
+  const [monthsToShow, setMonthsToShow] = useState(4);
 
   if (rows.length === 0) return null;
 
-  const activeFilter = FILTERS.find((f) => f.weeks === selectedWeeks) ?? FILTERS[2];
+  const cols = Math.ceil(monthsToShow * 4.345);
 
   return (
     <div className="page page-right">
-      <div className="block-label" style={{ marginBottom: 6 }}>
-        <span className="prompt-arrow">&rarr;</span> Heatmap
-        <span className="label-meta">by habit</span>
+      <div className="block-label" style={{ marginBottom: 10 }}>
+        <span className="prompt-arrow">&rarr;</span> Last {monthsToShow} month{monthsToShow !== 1 ? "s" : ""}
+        <span className="label-meta">filled = done &middot; empty = missed</span>
       </div>
 
-      <div className="heatmap-filters">
-        {FILTERS.map((f) => (
+      <div className="months-filter">
+        <span className="months-filter-label">show:</span>
+        {MONTH_OPTIONS.map((n) => (
           <button
-            key={f.label}
-            className={`heatmap-filter-btn${f.weeks === selectedWeeks ? " active" : ""}`}
-            onClick={() => setSelectedWeeks(f.weeks)}
+            key={n}
+            className={`months-chip${monthsToShow === n ? " active" : ""}`}
+            onClick={() => setMonthsToShow(n)}
           >
-            {f.label}
+            {n}m
           </button>
         ))}
       </div>
 
       <div className="heatmap-list">
-        {rows.map((row, hi) => {
-          const visibleWeeks = row.weeks.slice(-selectedWeeks);
+        {rows.map((row) => {
+          const visibleWeeks = row.weeks.slice(-cols);
+          const monthTicks = visibleWeeks.map((wk) => getMonth(wk[0].date));
+          const color = habitColor(row.habitId);
+
           return (
             <div key={row.habitId} className="heatmap-row">
               <div className="heatmap-row-head">
                 <div className="heatmap-name">
-                  <span className="cat-dot" style={{ background: habitColor(row.habitId) }} />
+                  <span className="cat-dot" style={{ background: color }} />
                   {row.habitName}
                 </div>
                 <div className="heatmap-stats">
@@ -70,35 +72,58 @@ export function HeatmapSection({ todayDate, rows }: HeatmapSectionProps) {
                   </span>
                 </div>
               </div>
-              <div className="heatmap-grid">
-                {visibleWeeks.map((week, ci) => (
-                  <div key={ci} className="heatmap-col">
-                    {week.map((cell, ri) => {
-                      const future = isFuture(cell.date, todayDate);
+              <div className="heatmap-body">
+                <div className="heatmap-day-labels">
+                  {DAY_LABELS.map((d, i) => (
+                    <div key={i} className="hm-day-label">
+                      {i % 2 === 1 ? d : ""}
+                    </div>
+                  ))}
+                </div>
+                <div className="heatmap-grid-wrap">
+                  <div
+                    className="heatmap-month-row"
+                    style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+                  >
+                    {monthTicks.map((m, ci) => {
+                      const showLabel = ci === 0 || monthTicks[ci - 1] !== m;
                       return (
-                        <div
-                          key={ri}
-                          className={`hm-cell${future ? " future" : ""}${cell.done ? " done" : ""}`}
-                        >
-                          {!future && cell.done && (
-                            <InkDot size={11} seed={hi * 7 + ci * 3 + ri} color={habitColor(row.habitId)} />
-                          )}
-                          {!future && !cell.done && (
-                            <div className="hm-empty-dot" />
-                          )}
+                        <div key={ci} className="hm-month-tick">
+                          {showLabel ? MONTH_SHORT[m] : ""}
                         </div>
                       );
                     })}
                   </div>
-                ))}
+                  <div
+                    className="heatmap-grid"
+                    style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+                  >
+                    {visibleWeeks.map((week, ci) => (
+                      <div key={ci} className="heatmap-col">
+                        {week.map((cell, ri) => {
+                          const future = isFuture(cell.date, todayDate);
+                          const done = cell.done && !future;
+                          return (
+                            <div
+                              key={ri}
+                              className={`hm-cell${future ? " future" : ""}${done ? " done" : ""}`}
+                              style={done ? { background: color, borderColor: color } : undefined}
+                              title={`${cell.date} — ${done ? "done" : future ? "future" : "missed"}`}
+                            />
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           );
         })}
       </div>
       <div className="heatmap-axis">
-        <span>~{activeFilter.label} ago</span>
-        <span>today</span>
+        <span>~{monthsToShow} month{monthsToShow !== 1 ? "s" : ""} ago</span>
+        <span>today &rarr;</span>
       </div>
     </div>
   );
