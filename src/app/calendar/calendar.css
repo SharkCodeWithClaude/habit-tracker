@@ -1,0 +1,361 @@
+/* Calendar-specific styles following the bullet journal design handoff */
+
+.calendar-page {
+  --paper: #fafaf3;
+  --paper-shade: #f3f1e4;
+  --paper-edge: #e8e3cf;
+  --ink: #161a2c;
+  --ink-soft: rgba(22, 26, 44, 0.6);
+  --dot: rgba(22, 26, 44, 0.16);
+  --rule: rgba(22, 26, 44, 0.12);
+
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, #e6dfc8, #cfc6ad 80%);
+  padding: 32px 24px 80px;
+  font-family: var(--font-kalam), system-ui, sans-serif;
+  color: var(--ink);
+}
+
+/* ===== Notebook shell ===== */
+.notebook {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.notebook-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1280px;
+  margin: 0 auto 18px;
+  padding: 0 4px;
+  gap: 16px;
+}
+
+.nav-title {
+  font-family: var(--font-caveat), cursive;
+  font-size: 26px;
+  color: var(--ink);
+  opacity: 0.8;
+  letter-spacing: 0.5px;
+}
+
+.nav-tabs {
+  display: inline-flex;
+  gap: 4px;
+  background: rgba(255,255,255,0.4);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  padding: 3px;
+}
+
+.nav-tab {
+  font-family: var(--font-caveat), cursive;
+  font-size: 18px;
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  padding: 5px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--ink);
+  letter-spacing: 0.5px;
+  transition: background 0.15s;
+  text-decoration: none;
+}
+
+.nav-tab:hover {
+  background: rgba(22,26,44,0.06);
+}
+
+.nav-tab.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ===== Page spread ===== */
+.page-spread {
+  display: grid;
+  grid-template-columns: 1fr;
+  background: var(--paper);
+  border-radius: 4px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.6) inset,
+    0 30px 60px -20px rgba(0,0,0,0.35),
+    0 8px 20px -8px rgba(0,0,0,0.2);
+  position: relative;
+  overflow: hidden;
+  background-image:
+    radial-gradient(circle at 1px 1px, var(--dot) 1px, transparent 1.5px);
+  background-size: 22px 22px;
+  background-position: 11px 11px;
+}
+
+/* paper texture noise */
+.page-spread::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0 0.15 0 0 0 0.04 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0.5;
+}
+
+.page {
+  padding: 36px 56px 44px;
+  position: relative;
+  min-height: 740px;
+}
+
+/* ===== Page header ===== */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.date-big {
+  font-family: var(--font-caveat), cursive;
+  font-size: 44px;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.5px;
+}
+
+.date-small {
+  font-family: var(--font-caveat), cursive;
+  font-size: 20px;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+
+/* ===== Month navigation ===== */
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.month-nav-btn {
+  background: transparent;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  color: var(--ink);
+}
+
+.month-nav-btn:hover {
+  background: rgba(22,26,44,0.06);
+}
+
+.month-nav-label {
+  font-family: var(--font-caveat), cursive;
+  font-size: 16px;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+/* ===== Page flip animation ===== */
+.month-paper-wrap {
+  perspective: 1600px;
+  margin-bottom: 18px;
+}
+
+.month-paper {
+  transform-origin: center center;
+  transform-style: preserve-3d;
+}
+
+.flipping.flip-next .month-paper {
+  animation: flipNext 0.55s ease-in-out forwards;
+}
+
+.flipping.flip-prev .month-paper {
+  animation: flipPrev 0.55s ease-in-out forwards;
+}
+
+@keyframes flipNext {
+  0%   { transform: rotateY(0) translateX(0); opacity: 1; }
+  50%  { transform: rotateY(-90deg) translateX(-30px); opacity: 0.3; }
+  51%  { transform: rotateY(90deg) translateX(30px); opacity: 0.3; }
+  100% { transform: rotateY(0) translateX(0); opacity: 1; }
+}
+
+@keyframes flipPrev {
+  0%   { transform: rotateY(0) translateX(0); opacity: 1; }
+  50%  { transform: rotateY(90deg) translateX(30px); opacity: 0.3; }
+  51%  { transform: rotateY(-90deg) translateX(-30px); opacity: 0.3; }
+  100% { transform: rotateY(0) translateX(0); opacity: 1; }
+}
+
+/* ===== Month grid ===== */
+.month-grid-head {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 6px;
+  border-bottom: 1.5px solid var(--ink);
+  padding-bottom: 4px;
+}
+
+.month-head-cell {
+  text-align: center;
+  font-family: var(--font-caveat), cursive;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 1px;
+}
+
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--rule);
+}
+
+.month-cell {
+  background: var(--paper);
+  aspect-ratio: 1 / 0.95;
+  padding: 6px 7px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-image:
+    radial-gradient(circle at 1px 1px, var(--dot) 1px, transparent 1.5px);
+  background-size: 12px 12px;
+  background-position: 6px 6px;
+}
+
+.month-cell.empty {
+  background: rgba(0,0,0,0.02);
+  background-image: none;
+}
+
+.month-cell.is-future {
+  opacity: 0.4;
+}
+
+.month-cell.is-today {
+  cursor: default;
+}
+
+.month-cell-num {
+  font-family: var(--font-caveat), cursive;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1;
+  z-index: 2;
+}
+
+.month-cell-marks {
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  z-index: 2;
+}
+
+.mc-pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  background: transparent;
+}
+
+.mc-pip.done {
+  background: var(--ink);
+}
+
+.mc-pip:not(.done) {
+  border-color: rgba(22, 26, 44, 0.33);
+}
+
+.today-circle {
+  position: absolute;
+  inset: 2px;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ===== Legend ===== */
+.month-legend {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 18px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--rule);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--ink);
+}
+
+.legend-name {
+  font-family: var(--font-kalam), sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+/* ===== Scribble ===== */
+.scribble {
+  display: block;
+  overflow: visible;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 880px) {
+  .calendar-page {
+    padding: 16px 12px 64px;
+  }
+
+  .page-spread {
+    background-position: 8px 8px;
+    background-size: 18px 18px;
+  }
+
+  .page {
+    padding: 26px 22px 22px;
+    min-height: auto;
+  }
+
+  .date-big { font-size: 34px; }
+  .date-small { font-size: 16px; }
+  .month-cell-num { font-size: 14px; }
+  .mc-pip { width: 5px; height: 5px; }
+
+  .notebook-nav {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-tab { font-size: 16px; padding: 4px 12px; }
+}

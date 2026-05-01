@@ -11,6 +11,7 @@ export async function toggleHabit(habitId: number, date?: string) {
   const d = date ?? getToday();
   storage.toggleHabitForDate(habitId, d);
   revalidatePath("/");
+  revalidatePath("/calendar");
 }
 
 export async function saveNote(note: string, date?: string) {
