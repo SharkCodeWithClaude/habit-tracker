@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS habit_logs (
 CREATE TABLE IF NOT EXISTS day_notes (
   date       TEXT PRIMARY KEY,
   note       TEXT NOT NULL DEFAULT '',
+  intention  TEXT NOT NULL DEFAULT '',
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 `;
@@ -29,10 +30,19 @@ const DB_PATH = path.join(process.cwd(), "data", "habits.db");
 
 let _db: Database.Database | null = null;
 
+function migrate(db: Database.Database): void {
+  const columns = db.pragma("table_info(day_notes)") as { name: string }[];
+  const hasIntention = columns.some((c) => c.name === "intention");
+  if (!hasIntention) {
+    db.exec("ALTER TABLE day_notes ADD COLUMN intention TEXT NOT NULL DEFAULT ''");
+  }
+}
+
 function initDb(db: Database.Database): void {
   db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
   db.exec(SCHEMA);
+  migrate(db);
 }
 
 export function getDb(): Database.Database {

@@ -2,8 +2,8 @@ import { Suspense } from "react";
 import { storage } from "@/db/storage";
 import { parseYearMonth } from "./calendar-utils";
 import { MonthGrid } from "./MonthGrid";
-import { Scribble } from "../components/Scribble";
 import Link from "next/link";
+import "../notebook.css";
 import "./calendar.css";
 
 export const dynamic = "force-dynamic";
@@ -25,10 +25,10 @@ async function CalendarContent({ searchParams }: CalendarPageProps) {
   const todayDate = getToday();
 
   return (
-    <div className="calendar-page">
+    <div className="notebook-page">
       <div className="notebook">
         <nav className="notebook-nav">
-          <div className="nav-title">— habit journal · {year} —</div>
+          <div className="nav-title">&mdash; habit journal &middot; {year} &mdash;</div>
           <div className="nav-tabs">
             <Link href="/" className="nav-tab">
               Today

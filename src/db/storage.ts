@@ -61,13 +61,14 @@ export class HabitStorage {
 
     const doneSet = new Set(logs.map((l) => l.habit_id));
 
-    const note = this.db
-      .prepare("SELECT note FROM day_notes WHERE date = ?")
-      .get(date) as { note: string } | undefined;
+    const dayNote = this.db
+      .prepare("SELECT note, intention FROM day_notes WHERE date = ?")
+      .get(date) as { note: string; intention: string } | undefined;
 
     return {
       date,
-      note: note?.note ?? "",
+      note: dayNote?.note ?? "",
+      intention: dayNote?.intention ?? "",
       habits: habits.map((h) => ({
         id: h.id,
         name: h.name,
@@ -85,6 +86,15 @@ export class HabitStorage {
       .run(date, note);
   }
 
+  setDayIntention(date: string, intention: string): void {
+    this.db
+      .prepare(
+        `INSERT INTO day_notes (date, intention, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
+         ON CONFLICT(date) DO UPDATE SET intention = excluded.intention, updated_at = CURRENT_TIMESTAMP`
+      )
+      .run(date, intention);
+  }
+
   getMonth(year: number, month: number): DayRecord[] {
     const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
     const daysInMonth = new Date(year, month, 0).getDate();
@@ -96,8 +106,8 @@ export class HabitStorage {
       .all(startDate, endDate) as { habit_id: number; date: string }[];
 
     const notes = this.db
-      .prepare("SELECT date, note FROM day_notes WHERE date >= ? AND date <= ?")
-      .all(startDate, endDate) as { date: string; note: string }[];
+      .prepare("SELECT date, note, intention FROM day_notes WHERE date >= ? AND date <= ?")
+      .all(startDate, endDate) as { date: string; note: string; intention: string }[];
 
     const logsByDate = new Map<string, Set<number>>();
     for (const log of logs) {
@@ -105,18 +115,20 @@ export class HabitStorage {
       logsByDate.get(log.date)!.add(log.habit_id);
     }
 
-    const notesByDate = new Map<string, string>();
+    const notesByDate = new Map<string, { note: string; intention: string }>();
     for (const n of notes) {
-      notesByDate.set(n.date, n.note);
+      notesByDate.set(n.date, { note: n.note, intention: n.intention });
     }
 
     const days: DayRecord[] = [];
     for (let d = 1; d <= daysInMonth; d++) {
       const date = `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
       const doneSet = logsByDate.get(date) ?? new Set();
+      const dayNote = notesByDate.get(date);
       days.push({
         date,
-        note: notesByDate.get(date) ?? "",
+        note: dayNote?.note ?? "",
+        intention: dayNote?.intention ?? "",
         habits: habits.map((h) => ({
           id: h.id,
           name: h.name,

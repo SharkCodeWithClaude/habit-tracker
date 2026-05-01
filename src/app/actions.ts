@@ -20,6 +20,12 @@ export async function saveNote(note: string, date?: string) {
   revalidatePath("/");
 }
 
+export async function saveIntention(intention: string, date?: string) {
+  const d = date ?? getToday();
+  storage.setDayIntention(d, intention);
+  revalidatePath("/");
+}
+
 export async function createHabit(formData: FormData) {
   const name = formData.get("name") as string;
   if (!name?.trim()) return;

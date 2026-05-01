@@ -16,5 +16,6 @@ CREATE TABLE IF NOT EXISTS habit_logs (
 CREATE TABLE IF NOT EXISTS day_notes (
   date       TEXT PRIMARY KEY,
   note       TEXT NOT NULL DEFAULT '',
+  intention  TEXT NOT NULL DEFAULT '',
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

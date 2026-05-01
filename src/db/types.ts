@@ -15,5 +15,6 @@ export interface HabitWithStatus {
 export interface DayRecord {
   date: string;
   note: string;
+  intention: string;
   habits: HabitWithStatus[];
 }
