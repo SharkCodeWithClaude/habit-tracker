@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS habits (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  name        TEXT NOT NULL,
+  created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+  archived_at DATETIME NULL,
+  sort_order  INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS habit_logs (
+  habit_id INTEGER NOT NULL REFERENCES habits(id),
+  date     TEXT    NOT NULL,
+  done     INTEGER NOT NULL DEFAULT 1,
+  PRIMARY KEY (habit_id, date)
+);
+
+CREATE TABLE IF NOT EXISTS day_notes (
+  date       TEXT PRIMARY KEY,
+  note       TEXT NOT NULL DEFAULT '',
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
