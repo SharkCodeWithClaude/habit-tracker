@@ -1,33 +1,17 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import fs from "fs";
-import path from "path";
-import Database from "better-sqlite3";
-import { getDbForPath } from "../init";
+import { setupTestDb, addDays, todayStr } from "./test-helpers";
 import { HabitStorage } from "../storage";
 
-const TEST_DB_PATH = path.join(__dirname, "test-weekly-review.db");
-
-let db: Database.Database;
 let store: HabitStorage;
+let cleanup: () => void;
 
-function addDays(base: string, n: number): string {
-  const d = new Date(base);
-  d.setDate(d.getDate() + n);
-  return d.toISOString().split("T")[0];
-}
-
-const today = new Date().toISOString().split("T")[0];
+const today = todayStr();
 
 beforeEach(() => {
-  if (fs.existsSync(TEST_DB_PATH)) fs.unlinkSync(TEST_DB_PATH);
-  db = getDbForPath(TEST_DB_PATH);
-  store = new HabitStorage(db);
+  ({ storage: store, cleanup } = setupTestDb());
 });
 
-afterEach(() => {
-  db.close();
-  if (fs.existsSync(TEST_DB_PATH)) fs.unlinkSync(TEST_DB_PATH);
-});
+afterEach(() => cleanup());
 
 describe("weekly review storage", () => {
   describe("getWeeklyReview", () => {

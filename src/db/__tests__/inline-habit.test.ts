@@ -1,28 +1,17 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import fs from "fs";
-import path from "path";
+import { setupTestDb } from "./test-helpers";
 import { HabitStorage } from "../storage";
-import { getDbForPath } from "../init";
 import type Database from "better-sqlite3";
-
-const TEST_DB_PATH = path.join(__dirname, "test-inline-habit.db");
 
 let db: Database.Database;
 let storage: HabitStorage;
+let cleanup: () => void;
 
 beforeEach(() => {
-  if (fs.existsSync(TEST_DB_PATH)) fs.unlinkSync(TEST_DB_PATH);
-  db = getDbForPath(TEST_DB_PATH);
-  storage = new HabitStorage(db);
+  ({ db, storage, cleanup } = setupTestDb());
 });
 
-afterEach(() => {
-  db.close();
-  for (const suffix of ["", "-wal", "-shm"]) {
-    const p = TEST_DB_PATH + suffix;
-    if (fs.existsSync(p)) fs.unlinkSync(p);
-  }
-});
+afterEach(() => cleanup());
 
 describe("inline habit creation", () => {
   it("creates a habit with a name", () => {

@@ -1,29 +1,17 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import fs from "fs";
-import path from "path";
+import { setupTestDb } from "./test-helpers";
 import { HabitStorage } from "../storage";
-import { getDbForPath } from "../init";
 import type Database from "better-sqlite3";
-
-const TEST_DB_PATH = path.join(__dirname, "test-habits.db");
 
 let db: Database.Database;
 let storage: HabitStorage;
+let cleanup: () => void;
 
 beforeEach(() => {
-  if (fs.existsSync(TEST_DB_PATH)) fs.unlinkSync(TEST_DB_PATH);
-  db = getDbForPath(TEST_DB_PATH);
-  storage = new HabitStorage(db);
+  ({ db, storage, cleanup } = setupTestDb());
 });
 
-afterEach(() => {
-  db.close();
-  if (fs.existsSync(TEST_DB_PATH)) fs.unlinkSync(TEST_DB_PATH);
-  const walPath = TEST_DB_PATH + "-wal";
-  const shmPath = TEST_DB_PATH + "-shm";
-  if (fs.existsSync(walPath)) fs.unlinkSync(walPath);
-  if (fs.existsSync(shmPath)) fs.unlinkSync(shmPath);
-});
+afterEach(() => cleanup());
 
 describe("HabitStorage", () => {
   describe("createHabit", () => {
