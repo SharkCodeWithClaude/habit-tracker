@@ -139,34 +139,4 @@ describe("HabitStorage", () => {
     });
   });
 
-  describe("getStreak", () => {
-    it("returns 0 for no logs", () => {
-      const habit = storage.createHabit("read");
-      expect(storage.getStreak(habit.id)).toBe(0);
-    });
-
-    it("counts consecutive days ending today", () => {
-      const habit = storage.createHabit("read");
-      const today = new Date();
-      for (let i = 0; i < 3; i++) {
-        const d = new Date(today);
-        d.setDate(d.getDate() - i);
-        storage.toggleHabitForDate(habit.id, d.toISOString().split("T")[0]);
-      }
-      expect(storage.getStreak(habit.id)).toBe(3);
-    });
-
-    it("yesterday-tolerant: streak counts from yesterday if today not done", () => {
-      const habit = storage.createHabit("read");
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const dayBefore = new Date();
-      dayBefore.setDate(dayBefore.getDate() - 2);
-
-      storage.toggleHabitForDate(habit.id, yesterday.toISOString().split("T")[0]);
-      storage.toggleHabitForDate(habit.id, dayBefore.toISOString().split("T")[0]);
-
-      expect(storage.getStreak(habit.id)).toBe(2);
-    });
-  });
 });

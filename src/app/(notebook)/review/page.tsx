@@ -1,4 +1,4 @@
-import { storage } from "@/db/storage";
+import { metrics } from "@/db/metrics";
 import { Scribble } from "../../components/Scribble";
 import { AutosaveTextarea } from "../../components/AutosaveTextarea";
 import { saveReflection } from "../../actions";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default function ReviewPage() {
   const todayDate = getToday();
-  const review = storage.getWeeklyReview(todayDate);
+  const review = metrics.getWeeklyReview(todayDate);
 
   const endDateObj = new Date(review.weekEndDate);
   const endStr = endDateObj.toLocaleDateString("en-US", {

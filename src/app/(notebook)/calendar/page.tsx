@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { storage } from "@/db/storage";
+import { metrics } from "@/db/metrics";
 import { parseYearMonth } from "../../calendar/calendar-utils";
 import { MonthGrid } from "../../calendar/MonthGrid";
 import { HeatmapSection } from "../../components/HeatmapSection";
@@ -30,7 +31,7 @@ async function CalendarContent({ searchParams }: CalendarPageProps) {
           todayDate={todayDate}
         />
       </div>
-      <HeatmapSection todayDate={todayDate} rows={storage.getHeatmapData(52)} />
+      <HeatmapSection todayDate={todayDate} rows={metrics.getHeatmapData(52)} />
     </div>
   );
 }

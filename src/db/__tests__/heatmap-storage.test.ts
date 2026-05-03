@@ -1,16 +1,19 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { setupTestDb, addDays, todayStr } from "./test-helpers";
+import { HabitMetrics } from "../metrics";
 import { HabitStorage } from "../storage";
 import type Database from "better-sqlite3";
 
 let db: Database.Database;
 let store: HabitStorage;
+let metrics: HabitMetrics;
 let cleanup: () => void;
 
 const today = todayStr();
 
 beforeEach(() => {
   ({ db, storage: store, cleanup } = setupTestDb());
+  metrics = new HabitMetrics(db);
 });
 
 afterEach(() => cleanup());
@@ -19,7 +22,7 @@ describe("heatmap storage", () => {
   describe("getHabitLogs", () => {
     it("returns empty array when no logs exist", () => {
       const habit = store.createHabit("Read");
-      const logs = store.getHabitLogs(habit.id, 126);
+      const logs = metrics.getHabitLogs(habit.id, 126);
       expect(logs).toEqual([]);
     });
 
@@ -29,7 +32,7 @@ describe("heatmap storage", () => {
       store.toggleHabitForDate(habit.id, addDays(today, -5));
       store.toggleHabitForDate(habit.id, addDays(today, -200));
 
-      const logs = store.getHabitLogs(habit.id, 126);
+      const logs = metrics.getHabitLogs(habit.id, 126);
       expect(logs).toHaveLength(2);
       expect(logs).toContain(today);
       expect(logs).toContain(addDays(today, -5));
@@ -42,7 +45,7 @@ describe("heatmap storage", () => {
       store.toggleHabitForDate(habit.id, addDays(today, -10));
       store.toggleHabitForDate(habit.id, addDays(today, -3));
 
-      const logs = store.getHabitLogs(habit.id, 126);
+      const logs = metrics.getHabitLogs(habit.id, 126);
       expect(logs).toEqual([...logs].sort());
     });
   });
@@ -50,7 +53,7 @@ describe("heatmap storage", () => {
   describe("getCompletionCount", () => {
     it("returns 0 when no logs exist", () => {
       const habit = store.createHabit("Read");
-      expect(store.getCompletionCount(habit.id, 30)).toBe(0);
+      expect(metrics.getCompletionCount(habit.id, 30)).toBe(0);
     });
 
     it("counts only logs within the specified day range", () => {
@@ -60,35 +63,32 @@ describe("heatmap storage", () => {
       store.toggleHabitForDate(habit.id, addDays(today, -29));
       store.toggleHabitForDate(habit.id, addDays(today, -45));
 
-      expect(store.getCompletionCount(habit.id, 30)).toBe(3);
+      expect(metrics.getCompletionCount(habit.id, 30)).toBe(3);
     });
   });
 
   describe("getBestStreak", () => {
     it("returns 0 when no logs exist", () => {
       const habit = store.createHabit("Read");
-      expect(store.getBestStreak(habit.id)).toBe(0);
+      expect(metrics.getBestStreak(habit.id)).toBe(0);
     });
 
     it("returns 1 for a single logged day", () => {
       const habit = store.createHabit("Read");
       store.toggleHabitForDate(habit.id, today);
-      expect(store.getBestStreak(habit.id)).toBe(1);
+      expect(metrics.getBestStreak(habit.id)).toBe(1);
     });
 
     it("returns the longest consecutive run", () => {
       const habit = store.createHabit("Read");
-      // Streak of 3: today, yesterday, day before
       store.toggleHabitForDate(habit.id, today);
       store.toggleHabitForDate(habit.id, addDays(today, -1));
       store.toggleHabitForDate(habit.id, addDays(today, -2));
-      // Gap at day -3
-      // Streak of 5: day -10 to day -6
       for (let i = -10; i <= -6; i++) {
         store.toggleHabitForDate(habit.id, addDays(today, i));
       }
 
-      expect(store.getBestStreak(habit.id)).toBe(5);
+      expect(metrics.getBestStreak(habit.id)).toBe(5);
     });
 
     it("handles non-contiguous single days", () => {
@@ -97,7 +97,7 @@ describe("heatmap storage", () => {
       store.toggleHabitForDate(habit.id, addDays(today, -5));
       store.toggleHabitForDate(habit.id, addDays(today, -1));
 
-      expect(store.getBestStreak(habit.id)).toBe(1);
+      expect(metrics.getBestStreak(habit.id)).toBe(1);
     });
   });
 
@@ -108,7 +108,7 @@ describe("heatmap storage", () => {
       const archived = store.createHabit("Old");
       store.archiveHabit(archived.id);
 
-      const rows = store.getHeatmapData(18);
+      const rows = metrics.getHeatmapData(18);
       expect(rows).toHaveLength(2);
       expect(rows[0].habitName).toBe("Read");
       expect(rows[1].habitName).toBe("Exercise");
@@ -116,13 +116,13 @@ describe("heatmap storage", () => {
 
     it("returns correct number of weeks", () => {
       store.createHabit("Read");
-      const rows = store.getHeatmapData(18);
+      const rows = metrics.getHeatmapData(18);
       expect(rows[0].weeks).toHaveLength(18);
     });
 
     it("each week has 7 days", () => {
       store.createHabit("Read");
-      const rows = store.getHeatmapData(18);
+      const rows = metrics.getHeatmapData(18);
       for (const week of rows[0].weeks) {
         expect(week).toHaveLength(7);
       }
@@ -132,7 +132,7 @@ describe("heatmap storage", () => {
       const habit = store.createHabit("Read");
       store.toggleHabitForDate(habit.id, today);
 
-      const rows = store.getHeatmapData(18);
+      const rows = metrics.getHeatmapData(18);
       const allDays = rows[0].weeks.flat();
       const todayCell = allDays.find((d) => d.date === today);
       expect(todayCell?.done).toBe(true);
@@ -144,7 +144,7 @@ describe("heatmap storage", () => {
         store.toggleHabitForDate(habit.id, addDays(today, -i));
       }
 
-      const rows = store.getHeatmapData(18);
+      const rows = metrics.getHeatmapData(18);
       expect(rows[0].total30).toBe(5);
       expect(rows[0].bestStreak).toBe(5);
     });

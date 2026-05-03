@@ -1,14 +1,19 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { setupTestDb, addDays, todayStr } from "./test-helpers";
+import { HabitMetrics } from "../metrics";
 import { HabitStorage } from "../storage";
 
 let store: HabitStorage;
+let metrics: HabitMetrics;
 let cleanup: () => void;
 
 const today = todayStr();
 
 beforeEach(() => {
-  ({ storage: store, cleanup } = setupTestDb());
+  const ctx = setupTestDb();
+  store = ctx.storage;
+  metrics = new HabitMetrics(ctx.db);
+  cleanup = ctx.cleanup;
 });
 
 afterEach(() => cleanup());
@@ -17,7 +22,7 @@ describe("weekly review storage", () => {
   describe("getWeeklyReview", () => {
     it("returns 7 days ending on the given date", () => {
       store.createHabit("Read");
-      const review = store.getWeeklyReview(today);
+      const review = metrics.getWeeklyReview(today);
       expect(review.days).toHaveLength(7);
       expect(review.days[6].date).toBe(today);
       expect(review.days[0].date).toBe(addDays(today, -6));
@@ -25,14 +30,14 @@ describe("weekly review storage", () => {
 
     it("marks today correctly in the days array", () => {
       store.createHabit("Read");
-      const review = store.getWeeklyReview(today);
+      const review = metrics.getWeeklyReview(today);
       expect(review.days[6].isToday).toBe(true);
       expect(review.days[0].isToday).toBe(false);
     });
 
     it("includes day letters and date numbers", () => {
       store.createHabit("Read");
-      const review = store.getWeeklyReview(today);
+      const review = metrics.getWeeklyReview(today);
       for (const day of review.days) {
         expect(day.dayLetter).toHaveLength(1);
         expect(day.dayNum).toBeGreaterThanOrEqual(1);
@@ -48,7 +53,7 @@ describe("weekly review storage", () => {
       store.toggleHabitForDate(h1.id, addDays(today, -2));
       store.toggleHabitForDate(h2.id, today);
 
-      const review = store.getWeeklyReview(today);
+      const review = metrics.getWeeklyReview(today);
       expect(review.habits).toHaveLength(2);
 
       const readStat = review.habits.find((h) => h.habitName === "Read")!;
@@ -66,13 +71,12 @@ describe("weekly review storage", () => {
     it("computes overall completion stats", () => {
       const h1 = store.createHabit("Read");
       const h2 = store.createHabit("Exercise");
-      // 3 completions for Read, 1 for Exercise = 4 total out of 14 possible
       store.toggleHabitForDate(h1.id, today);
       store.toggleHabitForDate(h1.id, addDays(today, -1));
       store.toggleHabitForDate(h1.id, addDays(today, -2));
       store.toggleHabitForDate(h2.id, today);
 
-      const review = store.getWeeklyReview(today);
+      const review = metrics.getWeeklyReview(today);
       expect(review.totalCompletions).toBe(4);
       expect(review.possibleCompletions).toBe(14);
       expect(review.pct).toBe(29);
@@ -86,13 +90,13 @@ describe("weekly review storage", () => {
       store.toggleHabitForDate(h1.id, addDays(today, -2));
       store.toggleHabitForDate(h2.id, today);
 
-      const review = store.getWeeklyReview(today);
+      const review = metrics.getWeeklyReview(today);
       expect(review.bestHabit?.habitName).toBe("Read");
       expect(review.worstHabit?.habitName).toBe("Exercise");
     });
 
     it("returns null for best/worst when no habits exist", () => {
-      const review = store.getWeeklyReview(today);
+      const review = metrics.getWeeklyReview(today);
       expect(review.bestHabit).toBeNull();
       expect(review.worstHabit).toBeNull();
     });
@@ -103,7 +107,7 @@ describe("weekly review storage", () => {
       store.archiveHabit(h2.id);
       store.toggleHabitForDate(h1.id, today);
 
-      const review = store.getWeeklyReview(today);
+      const review = metrics.getWeeklyReview(today);
       expect(review.habits).toHaveLength(1);
       expect(review.habits[0].habitName).toBe("Read");
     });
@@ -111,20 +115,20 @@ describe("weekly review storage", () => {
 
   describe("reflection persistence", () => {
     it("returns empty string when no reflection saved", () => {
-      const review = store.getWeeklyReview(today);
+      const review = metrics.getWeeklyReview(today);
       expect(review.reflection).toBe("");
     });
 
     it("saves and retrieves reflection text", () => {
       store.saveReflection(today, "Great week!");
-      const review = store.getWeeklyReview(today);
+      const review = metrics.getWeeklyReview(today);
       expect(review.reflection).toBe("Great week!");
     });
 
     it("updates existing reflection", () => {
       store.saveReflection(today, "First draft");
       store.saveReflection(today, "Updated reflection");
-      const review = store.getWeeklyReview(today);
+      const review = metrics.getWeeklyReview(today);
       expect(review.reflection).toBe("Updated reflection");
     });
   });

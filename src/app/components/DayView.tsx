@@ -1,4 +1,5 @@
 import { storage } from "@/db/storage";
+import { metrics } from "@/db/metrics";
 import { InkCheckbox } from "./InkCheckbox";
 import { EditableHabitName } from "./EditableHabitName";
 import { AddHabitInline } from "./AddHabitInline";
@@ -22,6 +23,9 @@ export function DayView({ date, isToday = false }: DayViewProps) {
   const yearStr = dateObj.getFullYear();
 
   const doneCount = day.habits.filter((h) => h.done).length;
+  const streaks = isToday
+    ? metrics.getStreaks(day.habits.map((h) => h.id))
+    : {};
 
   return (
     <div className="page-spread single">
@@ -76,7 +80,7 @@ export function DayView({ date, isToday = false }: DayViewProps) {
             ) : (
               <div className="habit-list">
                 {day.habits.map((habit, i) => {
-                  const streak = isToday ? storage.getStreak(habit.id) : 0;
+                  const streak = streaks[habit.id] ?? 0;
                   return (
                     <div
                       key={habit.id}
