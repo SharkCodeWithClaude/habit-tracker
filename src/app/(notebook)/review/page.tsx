@@ -1,6 +1,7 @@
 import { storage } from "@/db/storage";
 import { Scribble } from "../../components/Scribble";
-import { ReflectionTextarea } from "../../components/ReflectionTextarea";
+import { AutosaveTextarea } from "../../components/AutosaveTextarea";
+import { saveReflection } from "../../actions";
 import { habitColor } from "../../habit-colors";
 import { getToday } from "../../date-utils";
 import "./review.css";
@@ -158,9 +159,17 @@ export default function ReviewPage() {
           </div>
         </div>
 
-        <ReflectionTextarea
+        <AutosaveTextarea
           defaultValue={review.reflection}
-          weekEnd={review.weekEndDate}
+          onSave={async (value) => {
+            "use server";
+            await saveReflection(review.weekEndDate, value);
+          }}
+          label="Reflection"
+          className="review-prompt"
+          inputClassName="notes-input"
+          placeholder="what worked? what didn't? what to change next week?"
+          rows={5}
         />
       </div>
     </div>

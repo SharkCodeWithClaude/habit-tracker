@@ -2,9 +2,9 @@ import { storage } from "@/db/storage";
 import { InkCheckbox } from "./InkCheckbox";
 import { EditableHabitName } from "./EditableHabitName";
 import { AddHabitInline } from "./AddHabitInline";
-import { IntentionTextarea } from "./IntentionTextarea";
-import { NoteTextarea } from "./NoteTextarea";
+import { AutosaveTextarea } from "./AutosaveTextarea";
 import { Scribble } from "./Scribble";
+import { saveIntention, saveNote } from "../actions";
 import Link from "next/link";
 
 interface DayViewProps {
@@ -47,7 +47,18 @@ export function DayView({ date, isToday = false }: DayViewProps) {
           </div>
         )}
 
-        <IntentionTextarea defaultValue={day.intention} date={date} />
+        <AutosaveTextarea
+          defaultValue={day.intention}
+          onSave={async (value) => {
+            "use server";
+            await saveIntention(value, date);
+          }}
+          label="The great thing I will do today"
+          className="intention-block"
+          inputClassName="intention-input"
+          placeholder="write your one intention here..."
+          rows={2}
+        />
 
         <div className="two-col">
           <div className="habits-block">
@@ -100,7 +111,18 @@ export function DayView({ date, isToday = false }: DayViewProps) {
             <AddHabitInline />
           </div>
 
-          <NoteTextarea defaultValue={day.note} date={date} />
+          <AutosaveTextarea
+            defaultValue={day.note}
+            onSave={async (value) => {
+              "use server";
+              await saveNote(value, date);
+            }}
+            label="Notes"
+            className="notes-block"
+            inputClassName="notes-input"
+            placeholder="anything worth remembering..."
+            rows={10}
+          />
         </div>
       </div>
     </div>
