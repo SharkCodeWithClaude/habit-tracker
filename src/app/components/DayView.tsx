@@ -51,18 +51,27 @@ export function DayView({ date, isToday = false }: DayViewProps) {
           </div>
         )}
 
-        <AutosaveTextarea
-          defaultValue={day.intention}
-          onSave={async (value) => {
-            "use server";
-            await saveIntention(value, date);
-          }}
-          label="The great thing I will do today"
-          className="intention-block"
-          inputClassName="intention-input"
-          placeholder="write your one intention here..."
-          rows={2}
-        />
+        {isToday ? (
+          <AutosaveTextarea
+            defaultValue={day.intention}
+            onSave={async (value) => {
+              "use server";
+              await saveIntention(value, date);
+            }}
+            label="The great thing I will do today"
+            className="intention-block"
+            inputClassName="intention-input"
+            placeholder="write your one intention here..."
+            rows={2}
+          />
+        ) : day.intention ? (
+          <div className="intention-block">
+            <div className="block-label">
+              <span className="prompt-arrow">&rarr;</span> The great thing I will do today
+            </div>
+            <p className="readonly-text">{day.intention}</p>
+          </div>
+        ) : null}
 
         <div className="two-col">
           <div className="habits-block">
@@ -92,6 +101,7 @@ export function DayView({ date, isToday = false }: DayViewProps) {
                         date={date}
                         size={26}
                         seed={i + 1}
+                        readOnly={!isToday}
                       />
                       {isToday ? (
                         <EditableHabitName
@@ -122,18 +132,27 @@ export function DayView({ date, isToday = false }: DayViewProps) {
             {isToday && <AddHabitInline />}
           </div>
 
-          <AutosaveTextarea
-            defaultValue={day.note}
-            onSave={async (value) => {
-              "use server";
-              await saveNote(value, date);
-            }}
-            label="Notes"
-            className="notes-block"
-            inputClassName="notes-input"
-            placeholder="anything worth remembering..."
-            rows={10}
-          />
+          {isToday ? (
+            <AutosaveTextarea
+              defaultValue={day.note}
+              onSave={async (value) => {
+                "use server";
+                await saveNote(value, date);
+              }}
+              label="Notes"
+              className="notes-block"
+              inputClassName="notes-input"
+              placeholder="anything worth remembering..."
+              rows={10}
+            />
+          ) : day.note ? (
+            <div className="notes-block">
+              <div className="block-label">
+                <span className="prompt-arrow">&rarr;</span> Notes
+              </div>
+              <p className="readonly-text">{day.note}</p>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

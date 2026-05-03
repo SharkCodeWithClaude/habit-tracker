@@ -414,6 +414,16 @@
   font-style: italic;
 }
 
+/* ===== Read-only text ===== */
+.readonly-text {
+  font-family: var(--font-caveat), cursive;
+  font-size: 22px;
+  line-height: 28px;
+  color: var(--ink);
+  margin: 0;
+  white-space: pre-wrap;
+}
+
 /* ===== Empty state ===== */
 .empty-state {
   font-family: var(--font-kalam), sans-serif;

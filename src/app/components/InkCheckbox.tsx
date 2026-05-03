@@ -9,6 +9,7 @@ interface InkCheckboxProps {
   date?: string;
   size?: number;
   seed?: number;
+  readOnly?: boolean;
 }
 
 function jitter(seed: number, n: number): number {
@@ -16,7 +17,7 @@ function jitter(seed: number, n: number): number {
   return (x - Math.floor(x) - 0.5) * 1.6;
 }
 
-export function InkCheckbox({ habitId, done, date, size = 26, seed = 0 }: InkCheckboxProps) {
+export function InkCheckbox({ habitId, done, date, size = 26, seed = 0, readOnly = false }: InkCheckboxProps) {
   const [optimisticDone, setOptimisticDone] = useOptimistic(done);
   const [, startTransition] = useTransition();
   const s = size;
@@ -40,6 +41,7 @@ export function InkCheckbox({ habitId, done, date, size = 26, seed = 0 }: InkChe
   const checkPath = `M ${cx1} ${cy1} Q ${cx2 - 3} ${cy2 + 1} ${cx2} ${cy2} Q ${(cx2 + cx3) / 2} ${(cy2 + cy3) / 2 + 2} ${cx3} ${cy3}`;
 
   function handleToggle() {
+    if (readOnly) return;
     startTransition(async () => {
       setOptimisticDone(!optimisticDone);
       await toggleHabit(habitId, date);
@@ -51,11 +53,12 @@ export function InkCheckbox({ habitId, done, date, size = 26, seed = 0 }: InkChe
       type="button"
       onClick={handleToggle}
       aria-pressed={optimisticDone}
+      disabled={readOnly}
       style={{
         background: "transparent",
         border: "none",
         padding: 0,
-        cursor: "pointer",
+        cursor: readOnly ? "default" : "pointer",
         width: s + 6,
         height: s + 6,
         display: "inline-flex",
