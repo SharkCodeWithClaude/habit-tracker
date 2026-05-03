@@ -2,10 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { storage } from "@/db/storage";
-
-function getToday(): string {
-  return new Date().toISOString().split("T")[0];
-}
+import { getToday } from "./date-utils";
 
 function revalidateAll(date: string) {
   revalidatePath("/");

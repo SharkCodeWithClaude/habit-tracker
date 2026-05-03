@@ -3,14 +3,10 @@ import { storage } from "@/db/storage";
 import { parseYearMonth } from "../../calendar/calendar-utils";
 import { MonthGrid } from "../../calendar/MonthGrid";
 import { HeatmapSection } from "../../components/HeatmapSection";
+import { getToday } from "../../date-utils";
 import "../../calendar/calendar.css";
 
 export const dynamic = "force-dynamic";
-
-function getToday(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
 
 interface CalendarPageProps {
   searchParams: Promise<{ ym?: string }>;

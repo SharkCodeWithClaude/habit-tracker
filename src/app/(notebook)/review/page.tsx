@@ -2,14 +2,10 @@ import { storage } from "@/db/storage";
 import { Scribble } from "../../components/Scribble";
 import { ReflectionTextarea } from "../../components/ReflectionTextarea";
 import { habitColor } from "../../habit-colors";
+import { getToday } from "../../date-utils";
 import "./review.css";
 
 export const dynamic = "force-dynamic";
-
-function getToday(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
 
 export default function ReviewPage() {
   const todayDate = getToday();
