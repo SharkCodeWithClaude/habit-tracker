@@ -93,11 +93,18 @@ export function DayView({ date, isToday = false }: DayViewProps) {
                         size={26}
                         seed={i + 1}
                       />
-                      <EditableHabitName
-                        habitId={habit.id}
-                        name={habit.name}
-                        done={habit.done}
-                      />
+                      {isToday ? (
+                        <EditableHabitName
+                          habitId={habit.id}
+                          name={habit.name}
+                          done={habit.done}
+                        />
+                      ) : (
+                        <div className="habit-name-wrap">
+                          <span className="habit-name">{habit.name}</span>
+                          {habit.done && <span className="habit-strikethrough" />}
+                        </div>
+                      )}
                       <div className="habit-meta">
                         {streak > 0 && (
                           <span className="streak">
@@ -112,7 +119,7 @@ export function DayView({ date, isToday = false }: DayViewProps) {
               </div>
             )}
 
-            <AddHabitInline />
+            {isToday && <AddHabitInline />}
           </div>
 
           <AutosaveTextarea

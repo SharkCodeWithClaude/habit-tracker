@@ -1,14 +1,10 @@
 import { DayView } from "../../components/DayView";
 import { NotebookShell } from "../../components/NotebookShell";
+import { getToday } from "../../date-utils";
 import Link from "next/link";
 import "../../notebook.css";
 
 export const dynamic = "force-dynamic";
-
-function getToday(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
 
 interface DayPageProps {
   params: Promise<{ date: string }>;
@@ -33,6 +29,7 @@ export default async function DayPage({ params }: DayPageProps) {
   }
 
   const todayDate = getToday();
+
   const isToday = date === todayDate;
 
   return (
