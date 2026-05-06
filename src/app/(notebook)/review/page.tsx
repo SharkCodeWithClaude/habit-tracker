@@ -2,7 +2,7 @@ import { metrics } from "@/db/metrics";
 import { Scribble } from "../../components/Scribble";
 import { AutosaveTextarea } from "../../components/AutosaveTextarea";
 import { saveReflection } from "../../actions";
-import { habitColor } from "../../habit-colors";
+import { habitColor, REVIEW_FILL } from "../../habit-colors";
 import { getToday } from "../../date-utils";
 import "./review.css";
 
@@ -100,7 +100,7 @@ export default function ReviewPage() {
                             <svg width="10" height="10" viewBox="0 0 10 10">
                               <path
                                 d="M 1.5 5 L 4 7.5 L 8.5 2"
-                                stroke={habitColor(h.habitId)}
+                                stroke={REVIEW_FILL}
                                 strokeWidth="1.6"
                                 fill="none"
                                 strokeLinecap="round"
@@ -144,7 +144,7 @@ export default function ReviewPage() {
                           >
                             <path
                               d={`M 1 ${4 + (i % 2)} L 13 ${4 + ((i + 1) % 2)} L 13 12 L 1 12 Z`}
-                              fill={habitColor(h.habitId)}
+                              fill={REVIEW_FILL}
                               opacity="0.85"
                             />
                           </svg>
