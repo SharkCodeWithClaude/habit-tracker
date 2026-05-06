@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { habitColor } from "../habit-colors";
+import { habitColor, HEATMAP_FILL } from "../habit-colors";
 import type { HabitHeatmapRow } from "@/db/types";
 
 const MONTH_OPTIONS = [2, 3, 4, 6, 9, 12];
@@ -107,7 +107,7 @@ export function HeatmapSection({ todayDate, rows }: HeatmapSectionProps) {
                             <div
                               key={ri}
                               className={`hm-cell${future ? " future" : ""}${done ? " done" : ""}`}
-                              style={done ? { background: color, borderColor: color } : undefined}
+                              style={done ? { background: HEATMAP_FILL, borderColor: HEATMAP_FILL } : undefined}
                               title={`${cell.date} — ${done ? "done" : future ? "future" : "missed"}`}
                             />
                           );

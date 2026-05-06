@@ -16,6 +16,8 @@ const PALETTE = [
   "#a480cf", // violet
 ];
 
+export const HEATMAP_FILL = "var(--ink)";
+
 export function habitColor(habitId: number): string {
   return PALETTE[(habitId - 1) % PALETTE.length];
 }
