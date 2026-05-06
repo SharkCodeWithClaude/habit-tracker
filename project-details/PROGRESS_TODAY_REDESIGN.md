@@ -29,7 +29,7 @@
   - Per-instance jitter via seeded sin-based RNG (wobbly box corners)
   - Animated check stroke (strokeDasharray/offset with inkDraw keyframe)
   - Optimistic updates via useOptimistic
-- **IntentionTextarea** — "The great thing I will do today" textarea with:
+- **IntentionTextarea** — "Summarize your day with one line" textarea with:
   - Caveat 26px font, dashed bottom border
   - Save on blur via saveIntention action
 - **NoteTextarea** — redesigned with:

@@ -73,7 +73,7 @@ const ListView = ({ habits, logs, notes, setLogs, setNotes, ink, todayKey }) => 
 
         <div className="intention-block">
           <div className="block-label">
-            <span className="prompt-arrow">→</span> The great thing I will do today
+            <span className="prompt-arrow">→</span> Summarize your day with one line
           </div>
           <textarea
             className="intention-input"

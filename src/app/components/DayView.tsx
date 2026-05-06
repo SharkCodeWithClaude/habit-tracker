@@ -58,7 +58,7 @@ export function DayView({ date, isToday = false }: DayViewProps) {
               "use server";
               await saveIntention(value, date);
             }}
-            label="The great thing I will do today"
+            label="Summarize your day with one line"
             className="intention-block"
             inputClassName="intention-input"
             placeholder="write your one intention here..."
@@ -67,7 +67,7 @@ export function DayView({ date, isToday = false }: DayViewProps) {
         ) : day.intention ? (
           <div className="intention-block">
             <div className="block-label">
-              <span className="prompt-arrow">&rarr;</span> The great thing I will do today
+              <span className="prompt-arrow">&rarr;</span> Summarize your day with one line
             </div>
             <p className="readonly-text">{day.intention}</p>
           </div>
