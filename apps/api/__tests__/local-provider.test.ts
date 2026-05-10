@@ -59,10 +59,9 @@ describe("LocalProvider", () => {
       expect(Object.keys(result.proposals.ticks)).toHaveLength(0);
     });
 
-    it("returns confidence for alias matches", async () => {
+    it("returns confidence 1.0 for exact alias match", async () => {
       const result = await provider.chat(makeInput("ran today", sampleHabits));
-      expect(result.proposals.ticks["h1"].confidence).toBeGreaterThanOrEqual(0.5);
-      expect(result.proposals.ticks["h1"].confidence).toBeLessThanOrEqual(1.0);
+      expect(result.proposals.ticks["h1"].confidence).toBe(1.0);
     });
   });
 

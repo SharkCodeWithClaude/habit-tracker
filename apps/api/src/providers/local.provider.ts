@@ -72,7 +72,7 @@ export class LocalProvider implements InferenceProvider {
       });
 
       if (!negated) {
-        ticks[habit.id] = { confidence: 0.7, evidence: "" };
+        ticks[habit.id] = { confidence: 1.0, evidence: "" };
       }
     }
 
