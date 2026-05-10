@@ -1,11 +1,23 @@
 import { Hono } from "hono";
-import type { Habit } from "@habit-tracker/shared";
+import { createAuthRoutes } from "./routes/auth.routes.js";
+import { authMiddleware } from "./middleware/auth.middleware.js";
+import type { Database } from "./config/database.js";
+import type { AuthEnv } from "./middleware/auth.middleware.js";
 
-const app = new Hono();
+export function createApp(db?: Database) {
+  const app = new Hono();
 
-app.get("/health", (c) => {
-  return c.json({ status: "ok" });
-});
+  app.get("/health", (c) => {
+    return c.json({ status: "ok" });
+  });
 
-export { app };
-export type AppType = typeof app;
+  if (db) {
+    app.route("/api/auth", createAuthRoutes(db));
+  }
+
+  return app;
+}
+
+export { authMiddleware };
+export type { AuthEnv };
+export type AppType = ReturnType<typeof createApp>;

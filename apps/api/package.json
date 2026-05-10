@@ -18,11 +18,13 @@
   "dependencies": {
     "@habit-tracker/shared": "workspace:*",
     "@hono/node-server": "^1.14.0",
+    "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.7.0",
     "postgres": "^3.4.9"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^3.0.0",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "tsx": "^4.19.0",

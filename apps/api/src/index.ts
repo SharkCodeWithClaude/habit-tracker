@@ -1,6 +1,8 @@
 import { serve } from "@hono/node-server";
-import { app } from "./app.js";
+import { createApp } from "./app.js";
+import { getDb } from "./config/database.js";
 
+const app = createApp(getDb());
 const port = 4000;
 
 serve({ fetch: app.fetch, port }, (info) => {
