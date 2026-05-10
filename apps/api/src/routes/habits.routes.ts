@@ -37,6 +37,16 @@ export function createHabitRoutes(db: Database) {
     return c.json({ habits });
   });
 
+  router.get("/logs", async (c) => {
+    const date = c.req.query("date");
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return c.json({ error: "date query param required (YYYY-MM-DD)" }, 400);
+    }
+    const userId = c.get("userId");
+    const logs = await habitService.getLogsForDate(userId, date);
+    return c.json({ logs });
+  });
+
   router.get("/streaks", async (c) => {
     const userId = c.get("userId");
     const today = new Date().toISOString().slice(0, 10);

@@ -169,6 +169,16 @@ export class HabitService {
     return { log: { habitId: log.habitId, date: log.date, value: log.value } };
   }
 
+  async getLogsForDate(
+    userId: string,
+    date: string
+  ): Promise<{ habitId: string; date: string; value: number }[]> {
+    const habits = await this.habitRepo.listActive(userId);
+    const habitIds = habits.map((h) => h.id);
+    const logs = await this.logRepo.findByHabitIdsAndDate(habitIds, date);
+    return logs.map((l) => ({ habitId: l.habitId, date: l.date, value: l.value }));
+  }
+
   async getStreaks(userId: string, today: string): Promise<HabitStreak[]> {
     const habits = await this.habitRepo.listActive(userId);
 

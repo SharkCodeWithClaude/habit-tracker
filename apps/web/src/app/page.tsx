@@ -1,10 +1,5 @@
-import type { Habit } from "@habit-tracker/shared";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return (
-    <main>
-      <h1>Habit Tracker V2</h1>
-      <p>Coming soon.</p>
-    </main>
-  );
+  redirect("/today");
 }

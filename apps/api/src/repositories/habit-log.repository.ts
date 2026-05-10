@@ -1,4 +1,4 @@
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, inArray } from "drizzle-orm";
 import { habitLogs } from "../db/schema.js";
 import type { Database } from "../config/database.js";
 
@@ -35,6 +35,14 @@ export class HabitLogRepository {
     await this.db
       .delete(habitLogs)
       .where(and(eq(habitLogs.habitId, habitId), eq(habitLogs.date, date)));
+  }
+
+  async findByHabitIdsAndDate(habitIds: string[], date: string) {
+    if (habitIds.length === 0) return [];
+    return this.db
+      .select()
+      .from(habitLogs)
+      .where(and(inArray(habitLogs.habitId, habitIds), eq(habitLogs.date, date)));
   }
 
   async findByHabitOrderedDesc(habitId: string) {
