@@ -4,6 +4,8 @@ import {
   updateHabitSchema,
   toggleHabitSchema,
   setSessionSchema,
+  calendarQuerySchema,
+  heatmapQuerySchema,
 } from "@habit-tracker/shared";
 import { HabitService, HabitError } from "../services/habit.service.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -52,6 +54,34 @@ export function createHabitRoutes(db: Database) {
     const today = new Date().toISOString().slice(0, 10);
     const streaks = await habitService.getStreaks(userId, today);
     return c.json({ streaks });
+  });
+
+  router.get("/calendar", async (c) => {
+    const parsed = calendarQuerySchema.safeParse({ month: c.req.query("month") });
+    if (!parsed.success) {
+      return c.json(
+        { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
+        400
+      );
+    }
+
+    const userId = c.get("userId");
+    const days = await habitService.getCalendar(userId, parsed.data.month);
+    return c.json({ days });
+  });
+
+  router.get("/heatmap", async (c) => {
+    const parsed = heatmapQuerySchema.safeParse({ weeks: c.req.query("weeks") });
+    if (!parsed.success) {
+      return c.json(
+        { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
+        400
+      );
+    }
+
+    const userId = c.get("userId");
+    const heatmap = await habitService.getHeatmap(userId, parsed.data.weeks);
+    return c.json({ heatmap });
   });
 
   router.patch("/:id", async (c) => {

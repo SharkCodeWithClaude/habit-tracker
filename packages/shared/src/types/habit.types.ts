@@ -18,3 +18,15 @@ export interface HabitStreak {
   habitId: string;
   currentStreak: number;
 }
+
+export interface CalendarDay {
+  date: string;
+  completions: { habitId: string; value: number }[];
+}
+
+export interface HeatmapEntry {
+  habitId: string;
+  habitName: string;
+  habitEmoji: string;
+  days: { date: string; value: number }[];
+}
