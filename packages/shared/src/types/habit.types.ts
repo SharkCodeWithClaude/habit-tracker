@@ -9,3 +9,12 @@ export interface Habit {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface HabitWithAliases extends Habit {
+  aliases: string[];
+}
+
+export interface HabitStreak {
+  habitId: string;
+  currentStreak: number;
+}
