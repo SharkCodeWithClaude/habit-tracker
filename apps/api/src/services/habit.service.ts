@@ -1,7 +1,7 @@
 import { HabitRepository, HabitAliasRepository } from "../repositories/habit.repository.js";
 import { HabitLogRepository } from "../repositories/habit-log.repository.js";
 import type { Database } from "../config/database.js";
-import type { HabitWithAliases, HabitStreak } from "@habit-tracker/shared";
+import type { HabitWithAliases, HabitStreak, CalendarDay, HeatmapEntry } from "@habit-tracker/shared";
 
 function toHabitResponse(habit: {
   id: string;
@@ -181,6 +181,60 @@ export class HabitService {
     }
 
     return streaks;
+  }
+
+  async getCalendar(userId: string, month: string): Promise<CalendarDay[]> {
+    const habits = await this.habitRepo.listActive(userId);
+    const habitIds = habits.map((h) => h.id);
+
+    const [year, mon] = month.split("-").map(Number);
+    const startDate = `${month}-01`;
+    const lastDay = new Date(year, mon, 0).getDate();
+    const endDate = `${month}-${String(lastDay).padStart(2, "0")}`;
+
+    const logs = await this.logRepo.findByHabitIdsAndDateRange(habitIds, startDate, endDate);
+
+    const dayMap = new Map<string, { habitId: string; value: number }[]>();
+    for (const log of logs) {
+      const existing = dayMap.get(log.date) ?? [];
+      existing.push({ habitId: log.habitId, value: log.value });
+      dayMap.set(log.date, existing);
+    }
+
+    const days: CalendarDay[] = [];
+    for (let d = 1; d <= lastDay; d++) {
+      const date = `${month}-${String(d).padStart(2, "0")}`;
+      days.push({ date, completions: dayMap.get(date) ?? [] });
+    }
+
+    return days;
+  }
+
+  async getHeatmap(userId: string, weeks: number): Promise<HeatmapEntry[]> {
+    const habits = await this.habitRepo.listActive(userId);
+    const habitIds = habits.map((h) => h.id);
+
+    const today = new Date();
+    const startDate = new Date(today);
+    startDate.setUTCDate(startDate.getUTCDate() - weeks * 7 + 1);
+    const startStr = startDate.toISOString().slice(0, 10);
+    const endStr = today.toISOString().slice(0, 10);
+
+    const logs = await this.logRepo.findByHabitIdsAndDateRange(habitIds, startStr, endStr);
+
+    const habitLogMap = new Map<string, { date: string; value: number }[]>();
+    for (const log of logs) {
+      const existing = habitLogMap.get(log.habitId) ?? [];
+      existing.push({ date: log.date, value: log.value });
+      habitLogMap.set(log.habitId, existing);
+    }
+
+    return habits.map((h) => ({
+      habitId: h.id,
+      habitName: h.name,
+      habitEmoji: h.emoji,
+      days: habitLogMap.get(h.id) ?? [],
+    }));
   }
 }
 

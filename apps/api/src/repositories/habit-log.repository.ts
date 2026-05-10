@@ -1,4 +1,4 @@
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, gte, lte, inArray } from "drizzle-orm";
 import { habitLogs } from "../db/schema.js";
 import type { Database } from "../config/database.js";
 
@@ -43,5 +43,19 @@ export class HabitLogRepository {
       .from(habitLogs)
       .where(eq(habitLogs.habitId, habitId))
       .orderBy(desc(habitLogs.date));
+  }
+
+  async findByHabitIdsAndDateRange(habitIds: string[], startDate: string, endDate: string) {
+    if (habitIds.length === 0) return [];
+    return this.db
+      .select()
+      .from(habitLogs)
+      .where(
+        and(
+          inArray(habitLogs.habitId, habitIds),
+          gte(habitLogs.date, startDate),
+          lte(habitLogs.date, endDate)
+        )
+      );
   }
 }
