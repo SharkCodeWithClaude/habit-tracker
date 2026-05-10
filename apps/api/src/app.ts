@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { createAuthRoutes } from "./routes/auth.routes.js";
 import { createHabitRoutes } from "./routes/habits.routes.js";
+import { createReviewRoutes } from "./routes/reviews.routes.js";
 import { authMiddleware } from "./middleware/auth.middleware.js";
 import type { Database } from "./config/database.js";
 import type { AuthEnv } from "./middleware/auth.middleware.js";
@@ -15,6 +16,7 @@ export function createApp(db?: Database) {
   if (db) {
     app.route("/api/auth", createAuthRoutes(db));
     app.route("/api/habits", createHabitRoutes(db));
+    app.route("/api/reviews", createReviewRoutes(db));
   }
 
   return app;
