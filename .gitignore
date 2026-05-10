@@ -8,6 +8,16 @@ out/
 # database
 data/
 
+# build outputs
+dist/
+*.tsbuildinfo
+
+# turbo
+.turbo/
+
+# pnpm
+.pnpm-store/
+
 # misc
 .DS_Store
 *.pem
