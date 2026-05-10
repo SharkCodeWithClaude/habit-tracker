@@ -15,6 +15,9 @@ import {
   sendMessage,
   wrapConversation,
   createHabit,
+  fetchAiConfigs,
+  saveAiConfig,
+  deleteAiConfig,
 } from "../lib/api";
 
 const mockFetch = vi.fn();
@@ -383,5 +386,72 @@ describe("createHabit", () => {
     mockFetch.mockResolvedValue({ ok: false, status: 500 });
     const result = await createHabit("tok", "Walk", "🚶", "binary", []);
     expect(result).toBeNull();
+  });
+});
+
+describe("fetchAiConfigs", () => {
+  it("returns configs array", async () => {
+    const configs = [
+      { id: "cfg-1", provider: "claude", modelName: null, isActive: true, createdAt: "2026-05-10T00:00:00Z", updatedAt: "2026-05-10T00:00:00Z" },
+    ];
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ configs }),
+    });
+    const result = await fetchAiConfigs("tok");
+    expect(result).toEqual(configs);
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/api/settings/ai"),
+      expect.objectContaining({ method: "GET" })
+    );
+  });
+
+  it("returns empty array on failure", async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 401 });
+    const result = await fetchAiConfigs("tok");
+    expect(result).toEqual([]);
+  });
+});
+
+describe("saveAiConfig", () => {
+  it("saves provider config", async () => {
+    const config = { id: "cfg-1", provider: "openai", modelName: "gpt-4o", isActive: true, createdAt: "2026-05-10T00:00:00Z", updatedAt: "2026-05-10T00:00:00Z" };
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ config }),
+    });
+    const result = await saveAiConfig("tok", "openai", "sk-key", "gpt-4o");
+    expect(result).toEqual(config);
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/api/settings/ai"),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ provider: "openai", apiKey: "sk-key", modelName: "gpt-4o" }),
+      })
+    );
+  });
+
+  it("returns null on failure", async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 400 });
+    const result = await saveAiConfig("tok", "openai", "bad", undefined);
+    expect(result).toBeNull();
+  });
+});
+
+describe("deleteAiConfig", () => {
+  it("deletes a provider config", async () => {
+    mockFetch.mockResolvedValue({ ok: true, json: async () => ({ deleted: true }) });
+    const result = await deleteAiConfig("tok", "claude");
+    expect(result).toBe(true);
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/api/settings/ai/claude"),
+      expect.objectContaining({ method: "DELETE" })
+    );
+  });
+
+  it("returns false on failure", async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 404 });
+    const result = await deleteAiConfig("tok", "groq");
+    expect(result).toBe(false);
   });
 });

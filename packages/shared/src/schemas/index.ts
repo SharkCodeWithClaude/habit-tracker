@@ -6,3 +6,5 @@ export { createConversationSchema, createMessageSchema } from "./conversation.sc
 export type { CreateConversationInput, CreateMessageInput } from "./conversation.schema.js";
 export { getWeeklyReviewSchema, upsertReflectionSchema } from "./review.schema.js";
 export type { GetWeeklyReviewInput, UpsertReflectionInput } from "./review.schema.js";
+export { aiProviderSchema, saveAiConfigSchema } from "./ai-config.schema.js";
+export type { SaveAiConfigInput } from "./ai-config.schema.js";

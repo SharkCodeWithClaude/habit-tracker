@@ -232,3 +232,49 @@ export async function createHabit(
     aliases: data.habit.aliases,
   };
 }
+
+export interface AiConfig {
+  id: string;
+  provider: string;
+  modelName: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function fetchAiConfigs(token?: string): Promise<AiConfig[]> {
+  const data = await apiGet<{ configs: AiConfig[] }>("/api/settings/ai", token);
+  return data?.configs ?? [];
+}
+
+export async function saveAiConfig(
+  token: string | undefined,
+  provider: string,
+  apiKey: string,
+  modelName?: string
+): Promise<AiConfig | null> {
+  const data = await apiPost<{ config: AiConfig }>(
+    "/api/settings/ai",
+    { provider, apiKey, modelName },
+    token
+  );
+  return data?.config ?? null;
+}
+
+export async function deleteAiConfig(
+  token: string | undefined,
+  provider: string
+): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE}/api/settings/ai/${provider}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
