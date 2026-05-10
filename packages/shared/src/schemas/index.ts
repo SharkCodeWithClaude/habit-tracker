@@ -4,3 +4,5 @@ export { registerSchema, loginSchema } from "./auth.schema.js";
 export type { RegisterInput, LoginInput } from "./auth.schema.js";
 export { createConversationSchema, createMessageSchema } from "./conversation.schema.js";
 export type { CreateConversationInput, CreateMessageInput } from "./conversation.schema.js";
+export { getWeeklyReviewSchema, upsertReflectionSchema } from "./review.schema.js";
+export type { GetWeeklyReviewInput, UpsertReflectionInput } from "./review.schema.js";
