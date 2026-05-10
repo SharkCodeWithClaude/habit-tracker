@@ -7,6 +7,7 @@ import {
   ConversationService,
   ConversationError,
 } from "../services/conversation.service.js";
+import { InferenceService } from "../services/inference.service.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import type { AuthEnv } from "../middleware/auth.middleware.js";
 import type { Database } from "../config/database.js";
@@ -14,6 +15,7 @@ import type { Database } from "../config/database.js";
 export function createConversationRoutes(db: Database) {
   const router = new Hono<AuthEnv>();
   const service = new ConversationService(db);
+  const inferenceService = new InferenceService(db);
 
   router.use(authMiddleware);
 
@@ -80,6 +82,17 @@ export function createConversationRoutes(db: Database) {
 
     try {
       const result = await service.addMessage(userId, conversationId, parsed.data);
+
+      if (parsed.data.role === "user") {
+        const conversation = result.conversation;
+        const inference = await inferenceService.infer(
+          userId,
+          conversationId,
+          conversation.date
+        );
+        return c.json({ ...result, proposals: inference.proposals }, 201);
+      }
+
       return c.json(result, 201);
     } catch (e) {
       if (e instanceof ConversationError) {
