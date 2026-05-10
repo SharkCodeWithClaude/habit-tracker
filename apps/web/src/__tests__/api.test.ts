@@ -9,6 +9,12 @@ import {
   toggleHabit,
   setSession,
   buildLogMap,
+  fetchActiveConversation,
+  createConversation,
+  fetchMessages,
+  sendMessage,
+  wrapConversation,
+  createHabit,
 } from "../lib/api";
 
 const mockFetch = vi.fn();
@@ -214,5 +220,168 @@ describe("setSession", () => {
       expect.stringContaining("/api/habits/def-456/sessions"),
       expect.objectContaining({ method: "PATCH" })
     );
+  });
+});
+
+describe("fetchActiveConversation", () => {
+  it("returns active conversation on success", async () => {
+    const conv = {
+      id: "conv-1",
+      userId: "user-1",
+      date: "2026-05-10",
+      startedAt: "2026-05-10T08:00:00Z",
+      endedAt: null,
+      tokenCount: 100,
+    };
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ conversation: conv }),
+    });
+    const result = await fetchActiveConversation("tok");
+    expect(result).toEqual(conv);
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/api/conversations/active"),
+      expect.objectContaining({ method: "GET" })
+    );
+  });
+
+  it("returns null when no active conversation", async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 404 });
+    const result = await fetchActiveConversation("tok");
+    expect(result).toBeNull();
+  });
+});
+
+describe("createConversation", () => {
+  it("creates a new conversation with date", async () => {
+    const conv = {
+      id: "conv-2",
+      userId: "user-1",
+      date: "2026-05-10",
+      startedAt: "2026-05-10T08:00:00Z",
+      endedAt: null,
+      tokenCount: 0,
+    };
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ conversation: conv }),
+    });
+    const result = await createConversation("tok", "2026-05-10");
+    expect(result).toEqual(conv);
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/api/conversations"),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ date: "2026-05-10" }),
+      })
+    );
+  });
+
+  it("returns null on failure", async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 500 });
+    const result = await createConversation("tok", "2026-05-10");
+    expect(result).toBeNull();
+  });
+});
+
+describe("fetchMessages", () => {
+  it("returns messages array for a conversation", async () => {
+    const messages = [
+      { id: "m1", conversationId: "conv-1", role: "user", content: "I ran today", createdAt: "2026-05-10T08:01:00Z" },
+      { id: "m2", conversationId: "conv-1", role: "assistant", content: "Great job!", createdAt: "2026-05-10T08:01:01Z" },
+    ];
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ messages }),
+    });
+    const result = await fetchMessages("tok", "conv-1");
+    expect(result).toEqual(messages);
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/api/conversations/conv-1/messages"),
+      expect.objectContaining({ method: "GET" })
+    );
+  });
+
+  it("returns empty array on failure", async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 404 });
+    const result = await fetchMessages("tok", "conv-1");
+    expect(result).toEqual([]);
+  });
+});
+
+describe("sendMessage", () => {
+  it("sends user message to conversation", async () => {
+    const msg = { id: "m3", conversationId: "conv-1", role: "user", content: "Did yoga", createdAt: "2026-05-10T09:00:00Z" };
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ message: msg }),
+    });
+    const result = await sendMessage("tok", "conv-1", "Did yoga", "user");
+    expect(result).toEqual(msg);
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/api/conversations/conv-1/messages"),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ content: "Did yoga", role: "user" }),
+      })
+    );
+  });
+
+  it("returns null on failure", async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 400 });
+    const result = await sendMessage("tok", "conv-1", "test", "user");
+    expect(result).toBeNull();
+  });
+});
+
+describe("wrapConversation", () => {
+  it("wraps an active conversation", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ conversation: { id: "conv-1", endedAt: "2026-05-10T10:00:00Z" } }),
+    });
+    const result = await wrapConversation("tok", "conv-1");
+    expect(result).toBe(true);
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/api/conversations/conv-1/wrap"),
+      expect.objectContaining({ method: "POST" })
+    );
+  });
+
+  it("returns false on failure", async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 404 });
+    const result = await wrapConversation("tok", "conv-1");
+    expect(result).toBe(false);
+  });
+});
+
+describe("createHabit", () => {
+  it("creates a new habit", async () => {
+    const habit = {
+      id: "hab-new",
+      name: "Walk",
+      emoji: "🚶",
+      kind: "binary",
+      aliases: ["walk", "walking"],
+    };
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ habit }),
+    });
+    const result = await createHabit("tok", "Walk", "🚶", "binary", ["walk", "walking"]);
+    expect(result).toEqual({ id: "hab-new", name: "Walk", emoji: "🚶", kind: "binary", aliases: ["walk", "walking"] });
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/api/habits"),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ name: "Walk", emoji: "🚶", kind: "binary", aliases: ["walk", "walking"] }),
+      })
+    );
+  });
+
+  it("returns null on failure", async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 500 });
+    const result = await createHabit("tok", "Walk", "🚶", "binary", []);
+    expect(result).toBeNull();
   });
 });

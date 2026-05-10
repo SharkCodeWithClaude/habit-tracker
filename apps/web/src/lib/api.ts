@@ -134,3 +134,101 @@ export async function setSession(
 ): Promise<{ log: ApiLog | null } | null> {
   return apiPatch<{ log: ApiLog | null }>(`/api/habits/${habitId}/sessions`, { date, value }, token);
 }
+
+interface ApiConversation {
+  id: string;
+  userId: string;
+  date: string;
+  startedAt: string;
+  endedAt: string | null;
+  tokenCount: number;
+}
+
+interface ApiMessage {
+  id: string;
+  conversationId: string;
+  role: "user" | "assistant";
+  content: string;
+  createdAt: string;
+}
+
+export async function fetchActiveConversation(
+  token?: string
+): Promise<ApiConversation | null> {
+  const data = await apiGet<{ conversation: ApiConversation }>(
+    "/api/conversations/active",
+    token
+  );
+  return data?.conversation ?? null;
+}
+
+export async function createConversation(
+  token: string | undefined,
+  date: string
+): Promise<ApiConversation | null> {
+  const data = await apiPost<{ conversation: ApiConversation }>(
+    "/api/conversations",
+    { date },
+    token
+  );
+  return data?.conversation ?? null;
+}
+
+export async function fetchMessages(
+  token: string | undefined,
+  conversationId: string
+): Promise<ApiMessage[]> {
+  const data = await apiGet<{ messages: ApiMessage[] }>(
+    `/api/conversations/${conversationId}/messages`,
+    token
+  );
+  return data?.messages ?? [];
+}
+
+export async function sendMessage(
+  token: string | undefined,
+  conversationId: string,
+  content: string,
+  role: "user" | "assistant"
+): Promise<ApiMessage | null> {
+  const data = await apiPost<{ message: ApiMessage }>(
+    `/api/conversations/${conversationId}/messages`,
+    { content, role },
+    token
+  );
+  return data?.message ?? null;
+}
+
+export async function wrapConversation(
+  token: string | undefined,
+  conversationId: string
+): Promise<boolean> {
+  const data = await apiPost<{ conversation: unknown }>(
+    `/api/conversations/${conversationId}/wrap`,
+    {},
+    token
+  );
+  return data !== null;
+}
+
+export async function createHabit(
+  token: string | undefined,
+  name: string,
+  emoji: string,
+  kind: "binary" | "session",
+  aliases: string[]
+): Promise<Habit | null> {
+  const data = await apiPost<{ habit: ApiHabit }>(
+    "/api/habits",
+    { name, emoji, kind, aliases },
+    token
+  );
+  if (!data?.habit) return null;
+  return {
+    id: data.habit.id,
+    name: data.habit.name,
+    emoji: data.habit.emoji,
+    kind: data.habit.kind,
+    aliases: data.habit.aliases,
+  };
+}
