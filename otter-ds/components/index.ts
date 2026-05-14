@@ -5,6 +5,8 @@ export * from "./Journal";
 export { Proposals } from "./Proposals";
 export type { ProposalsProps } from "./Proposals";
 export * from "./Habits";
+export { InlineChecklist } from "./InlineChecklist";
+export type { InlineChecklistProps } from "./InlineChecklist";
 export { Chat } from "./Chat";
 export type { ChatMessage, ChatProps } from "./Chat";
 

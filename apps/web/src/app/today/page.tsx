@@ -6,6 +6,7 @@ import { Sidebar } from "otter-ds/components/Sidebar";
 import { DateStrip } from "otter-ds/components/DateStrip";
 import { Habits } from "otter-ds/components/Habits";
 import { Chat } from "otter-ds/components/Chat";
+import { InlineChecklist } from "otter-ds/components/InlineChecklist";
 import type { ChatMessage } from "otter-ds/components/Chat";
 import { Proposals } from "otter-ds/components/Proposals";
 import Icon from "otter-ds/components/Icon";
@@ -225,6 +226,14 @@ export default function TodayPage() {
     setProposals({ ticks: {}, newHabits: [] });
   };
 
+  const handleInlineCreate = async (name: string) => {
+    const habit = await createHabit(undefined, name, "✨", "binary", [name.toLowerCase()]);
+    if (habit) {
+      setHabits((prev) => [...prev, habit]);
+    }
+    return habit;
+  };
+
   const selectedDate = React.useMemo(() => {
     const [y, m, d] = selectedKey.split("-").map(Number);
     return new Date(y, m - 1, d);
@@ -296,6 +305,8 @@ export default function TodayPage() {
             shouldWrap={shouldWrap}
             onNewSession={handleNewSession}
           />
+
+          <InlineChecklist onCreateHabit={handleInlineCreate} />
 
           {hasProposals && (
             <Proposals
