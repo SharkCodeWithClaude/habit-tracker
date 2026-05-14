@@ -1,7 +1,7 @@
 export type HabitKind = "binary" | "session";
 
 export interface Habit {
-  id: number;
+  id: string;
   name: string;
   emoji: string;
   kind: HabitKind;

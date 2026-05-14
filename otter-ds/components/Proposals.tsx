@@ -7,8 +7,8 @@ import type { Habit, Proposals as ProposalsT, ProposalNewHabit, ProposalTick } f
 export interface ProposalsProps {
   proposals: ProposalsT;
   habits: Habit[];
-  onConfirmTick: (habitId: number, info: ProposalTick) => void;
-  onDismissTick: (habitId: number) => void;
+  onConfirmTick: (habitId: string, info: ProposalTick) => void;
+  onDismissTick: (habitId: string) => void;
   onAddHabit: (h: ProposalNewHabit) => void;
   onDismissNew: (idx: number) => void;
   onClear: () => void;

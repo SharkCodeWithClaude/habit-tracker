@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { generateAssistantResponse, extractProposalsFromText } from "../lib/chat";
-import type { Habit, Proposals } from "@/otter-ds/lib/types";
+import type { Habit, Proposals } from "otter-ds/lib/types";
 
 const HABITS: Habit[] = [
   { id: "h1", name: "Workout", emoji: "🏃", kind: "binary", aliases: ["workout", "gym", "exercise"] },

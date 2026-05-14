@@ -1,5 +1,5 @@
-import { localInfer } from "@/otter-ds/lib/infer";
-import type { Habit, Proposals } from "@/otter-ds/lib/types";
+import { localInfer } from "otter-ds/lib/infer";
+import type { Habit, Proposals } from "otter-ds/lib/types";
 
 export function extractProposalsFromText(
   text: string,

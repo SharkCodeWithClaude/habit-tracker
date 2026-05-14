@@ -1,11 +1,11 @@
 import type { Habit, LogMap } from "./types";
 
 export const SEED_HABITS: Habit[] = [
-  { id: 1, name: "Workout",         emoji: "🏃", kind: "binary",  aliases: ["workout","run","ran","running","gym","exercise","lifted","training"] },
-  { id: 2, name: "Read",            emoji: "📖", kind: "session", aliases: ["read","reading","pages","chapter","book"] },
-  { id: 4, name: "Meditate",        emoji: "🧘", kind: "session", aliases: ["meditate","meditation","mindfulness","breath","sat"] },
-  { id: 5, name: "Journal",         emoji: "✒️", kind: "binary",  aliases: ["journal","wrote","journaling","reflection"] },
-  { id: 6, name: "No phone in bed", emoji: "🌙", kind: "binary",  aliases: ["no phone","phone free","off phone","left phone","no screen"] },
+  { id: "1", name: "Workout",         emoji: "🏃", kind: "binary",  aliases: ["workout","run","ran","running","gym","exercise","lifted","training"] },
+  { id: "2", name: "Read",            emoji: "📖", kind: "session", aliases: ["read","reading","pages","chapter","book"] },
+  { id: "4", name: "Meditate",        emoji: "🧘", kind: "session", aliases: ["meditate","meditation","mindfulness","breath","sat"] },
+  { id: "5", name: "Journal",         emoji: "✒️", kind: "binary",  aliases: ["journal","wrote","journaling","reflection"] },
+  { id: "6", name: "No phone in bed", emoji: "🌙", kind: "binary",  aliases: ["no phone","phone free","off phone","left phone","no screen"] },
 ];
 
 export const dateKey = (d: Date): string =>

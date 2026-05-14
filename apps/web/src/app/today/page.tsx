@@ -2,15 +2,15 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Sidebar } from "@/otter-ds/components/Sidebar";
-import { DateStrip } from "@/otter-ds/components/DateStrip";
-import { Habits } from "@/otter-ds/components/Habits";
-import { Chat } from "@/otter-ds/components/Chat";
-import type { ChatMessage } from "@/otter-ds/components/Chat";
-import { Proposals } from "@/otter-ds/components/Proposals";
-import Icon from "@/otter-ds/components/Icon";
-import { dateKey } from "@/otter-ds/lib/helpers";
-import type { Habit, LogMap, Proposals as ProposalsT, ProposalTick, ProposalNewHabit } from "@/otter-ds/lib/types";
+import { Sidebar } from "otter-ds/components/Sidebar";
+import { DateStrip } from "otter-ds/components/DateStrip";
+import { Habits } from "otter-ds/components/Habits";
+import { Chat } from "otter-ds/components/Chat";
+import type { ChatMessage } from "otter-ds/components/Chat";
+import { Proposals } from "otter-ds/components/Proposals";
+import Icon from "otter-ds/components/Icon";
+import { dateKey } from "otter-ds/lib/helpers";
+import type { Habit, LogMap, Proposals as ProposalsT, ProposalTick, ProposalNewHabit } from "otter-ds/lib/types";
 import {
   fetchHabits,
   fetchStreaks,

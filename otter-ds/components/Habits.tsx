@@ -10,14 +10,17 @@ export interface HabitsProps {
   logs: LogMap;
   setLogs: React.Dispatch<React.SetStateAction<LogMap>>;
   dateK: string;
+  streaks?: Record<string, number>;
+  onToggle?: (habitId: string, dateK: string) => void;
+  onAddSession?: (habitId: string, dateK: string, newCount: number) => void;
 }
 
 interface RowProps {
   habit: Habit;
   logs: LogMap;
   dateK: string;
-  onToggle: (id: number) => void;
-  onAddSession: (id: number) => void;
+  onToggle: (id: string) => void;
+  onAddSession: (id: string) => void;
   streak: number;
 }
 
@@ -62,8 +65,12 @@ function HabitRow({ habit, logs, dateK, onToggle, onAddSession, streak }: RowPro
   );
 }
 
-export function Habits({ habits, logs, setLogs, dateK }: HabitsProps) {
-  const toggle = (hid: number) => {
+export function Habits({ habits, logs, setLogs, dateK, streaks, onToggle, onAddSession }: HabitsProps) {
+  const toggle = (hid: string) => {
+    if (onToggle) {
+      onToggle(hid, dateK);
+      return;
+    }
     setLogs((l) => {
       const k = `${hid}|${dateK}`;
       const next = { ...l };
@@ -78,12 +85,20 @@ export function Habits({ habits, logs, setLogs, dateK }: HabitsProps) {
       return next;
     });
   };
-  const addSession = (hid: number) => {
+  const addSession = (hid: string) => {
+    const k = `${hid}|${dateK}`;
+    const newCount = (Number(logs[k]) || 0) + 1;
+    if (onAddSession) {
+      onAddSession(hid, dateK, newCount);
+      return;
+    }
     setLogs((l) => {
-      const k = `${hid}|${dateK}`;
-      return { ...l, [k]: (Number(l[k]) || 0) + 1 };
+      return { ...l, [k]: newCount };
     });
   };
+
+  const getStreak = (h: Habit) =>
+    streaks ? (streaks[h.id] ?? 0) : computeStreak(h, logs, dateK);
 
   const doneCount = habits.filter((h) => isDone(h, logs, dateK)).length;
 
@@ -109,7 +124,7 @@ export function Habits({ habits, logs, setLogs, dateK }: HabitsProps) {
             dateK={dateK}
             onToggle={toggle}
             onAddSession={addSession}
-            streak={computeStreak(h, logs, dateK)}
+            streak={getStreak(h)}
           />
         ))}
       </div>

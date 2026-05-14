@@ -1,4 +1,4 @@
-import type { Habit, LogMap } from "@/otter-ds/lib/types";
+import type { Habit, LogMap } from "otter-ds/lib/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
