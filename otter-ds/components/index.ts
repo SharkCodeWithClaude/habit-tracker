@@ -10,7 +10,7 @@ export type { InlineChecklistProps } from "./InlineChecklist";
 export { Chat } from "./Chat";
 export type { ChatMessage, ChatProps } from "./Chat";
 
-export type { Habit, HabitKind, LogMap, ProposalTick, ProposalNewHabit, Proposals as ProposalsType } from "../lib/types";
+export type { Habit, HabitKind, LogMap, ProposalTick, ProposalNewHabit, ProposalsData } from "../lib/types";
 export * from "../lib/helpers";
 export * from "../lib/infer";
 export * from "../lib/tokens";

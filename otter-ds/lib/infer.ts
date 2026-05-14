@@ -1,4 +1,4 @@
-import type { Habit, Proposals } from "./types";
+import type { Habit, ProposalsData } from "./types";
 
 const NEG_PHRASES = ["didn't", "did not", "no ", "skipped", "forgot", "missed", "couldn't", "wasn't able"];
 
@@ -13,10 +13,10 @@ const NEW_HABIT_CANDIDATES: { rx: RegExp; name: string; emoji: string }[] = [
 ];
 
 /** Local regex fallback — no network, no LLM. */
-export const localInfer = (text: string, habits: Habit[]): Proposals => {
+export const localInfer = (text: string, habits: Habit[]): ProposalsData => {
   if (!text || !text.trim()) return { ticks: {}, newHabits: [] };
   const t = text.toLowerCase();
-  const ticks: Proposals["ticks"] = {};
+  const ticks: ProposalsData["ticks"] = {};
   habits.forEach((h) => {
     const matched = (h.aliases || []).some((a) => t.includes(a));
     if (!matched) return;
@@ -28,7 +28,7 @@ export const localInfer = (text: string, habits: Habit[]): Proposals => {
     });
     if (!negated) ticks[String(h.id)] = { confidence: 0.7, evidence: "" };
   });
-  const newHabits: Proposals["newHabits"] = [];
+  const newHabits: ProposalsData["newHabits"] = [];
   NEW_HABIT_CANDIDATES.forEach((c) => {
     if (c.rx.test(t)) {
       const already = habits.some((h) => h.name.toLowerCase() === c.name.toLowerCase());
@@ -39,7 +39,7 @@ export const localInfer = (text: string, habits: Habit[]): Proposals => {
 };
 
 /** LLM-powered inference. Calls window.claude.complete if available. */
-export const llmInfer = async (text: string, habits: Habit[]): Promise<Proposals> => {
+export const llmInfer = async (text: string, habits: Habit[]): Promise<ProposalsData> => {
   if (!text || !text.trim()) return { ticks: {}, newHabits: [] };
   if (typeof window === "undefined" || !window.claude?.complete) {
     return localInfer(text, habits);

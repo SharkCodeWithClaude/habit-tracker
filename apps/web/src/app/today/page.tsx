@@ -11,7 +11,7 @@ import type { ChatMessage } from "otter-ds/components/Chat";
 import { Proposals } from "otter-ds/components/Proposals";
 import Icon from "otter-ds/components/Icon";
 import { dateKey } from "otter-ds/lib/helpers";
-import type { Habit, LogMap, Proposals as ProposalsT, ProposalTick, ProposalNewHabit } from "otter-ds/lib/types";
+import type { Habit, LogMap, ProposalsData, ProposalTick, ProposalNewHabit } from "otter-ds/lib/types";
 import {
   fetchHabits,
   fetchStreaks,
@@ -51,7 +51,7 @@ export default function TodayPage() {
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
   const [thinking, setThinking] = React.useState(false);
   const [shouldWrap, setShouldWrap] = React.useState(false);
-  const [proposals, setProposals] = React.useState<ProposalsT>({ ticks: {}, newHabits: [] });
+  const [proposals, setProposals] = React.useState<ProposalsData>({ ticks: {}, newHabits: [] });
 
   React.useEffect(() => {
     let cancelled = false;
@@ -227,7 +227,7 @@ export default function TodayPage() {
   };
 
   const handleInlineCreate = async (name: string) => {
-    const habit = await createHabit(undefined, name, "✨", "binary", [name.toLowerCase()]);
+    const habit = await createHabit(name, "✨", "binary", [name.toLowerCase()]);
     if (habit) {
       setHabits((prev) => [...prev, habit]);
     }

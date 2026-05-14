@@ -17,7 +17,7 @@ import {
   dateKey,
   seedLogs,
 } from "../components";
-import type { Habit, LogMap, Proposals as ProposalsT, ProposalNewHabit, ProposalTick } from "../lib/types";
+import type { Habit, LogMap, ProposalsData, ProposalNewHabit, ProposalTick } from "../lib/types";
 
 export default function TodayPage() {
   const today = React.useMemo(() => new Date(), []);
@@ -28,7 +28,7 @@ export default function TodayPage() {
   const [logs, setLogs] = React.useState<LogMap>(() => seedLogs(SEED_HABITS));
   const [notes, setNotes] = React.useState<Record<string, string>>({});
   const [selectedKey, setSelectedKey] = React.useState(todayKey);
-  const [proposals, setProposals] = React.useState<ProposalsT>({ ticks: {}, newHabits: [] });
+  const [proposals, setProposals] = React.useState<ProposalsData>({ ticks: {}, newHabits: [] });
 
   const journalText = notes[selectedKey] || "";
   const setJournalText = (v: string) =>

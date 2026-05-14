@@ -1,16 +1,16 @@
 import { localInfer } from "otter-ds/lib/infer";
-import type { Habit, Proposals } from "otter-ds/lib/types";
+import type { Habit, ProposalsData } from "otter-ds/lib/types";
 
 export function extractProposalsFromText(
   text: string,
   habits: Habit[]
-): Proposals {
+): ProposalsData {
   return localInfer(text, habits);
 }
 
 export function generateAssistantResponse(
   userText: string,
-  proposals: Proposals,
+  proposals: ProposalsData,
   habits: Habit[]
 ): string {
   const tickIds = Object.keys(proposals.ticks || {});

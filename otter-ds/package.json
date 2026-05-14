@@ -9,6 +9,24 @@
   },
   "main": "components/index.ts",
   "types": "components/index.ts",
+  "exports": {
+    ".": "./components/index.ts",
+    "./components": "./components/index.ts",
+    "./components/Chat": "./components/Chat.tsx",
+    "./components/DateStrip": "./components/DateStrip.tsx",
+    "./components/Habits": "./components/Habits.tsx",
+    "./components/Icon": "./components/Icon.tsx",
+    "./components/InlineChecklist": "./components/InlineChecklist.tsx",
+    "./components/Journal": "./components/Journal.tsx",
+    "./components/Proposals": "./components/Proposals.tsx",
+    "./components/Sidebar": "./components/Sidebar.tsx",
+    "./lib/helpers": "./lib/helpers.ts",
+    "./lib/infer": "./lib/infer.ts",
+    "./lib/tokens": "./lib/tokens.ts",
+    "./lib/types": "./lib/types.ts",
+    "./hooks/useVoiceRecorder": "./hooks/useVoiceRecorder.ts",
+    "./styles/*": "./styles/*"
+  },
   "sideEffects": [
     "*.css"
   ]

@@ -26,7 +26,7 @@ export interface ProposalNewHabit {
   reason?: string;
 }
 
-export interface Proposals {
+export interface ProposalsData {
   ticks: Record<string, ProposalTick>;
   newHabits: ProposalNewHabit[];
 }

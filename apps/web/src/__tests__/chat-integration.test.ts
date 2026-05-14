@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { extractProposalsFromText, generateAssistantResponse } from "../lib/chat";
-import type { Habit, Proposals } from "otter-ds/lib/types";
+import type { Habit, ProposalsData } from "otter-ds/lib/types";
 import type { ChatMessage } from "otter-ds/components/Chat";
 
 const HABITS: Habit[] = [
@@ -64,7 +64,7 @@ describe("Chat integration flow", () => {
   });
 
   it("dismissing a proposal removes it from proposals state", () => {
-    const proposals: Proposals = {
+    const proposals: ProposalsData = {
       ticks: {
         h1: { confidence: 0.8, evidence: "gym" },
         h2: { confidence: 0.7 },
@@ -86,7 +86,7 @@ describe("Chat integration flow", () => {
 
   it("wrap session clears state for fresh conversation", () => {
     const freshMessages: ChatMessage[] = [];
-    const freshProposals: Proposals = { ticks: {}, newHabits: [] };
+    const freshProposals: ProposalsData = { ticks: {}, newHabits: [] };
     expect(freshMessages).toHaveLength(0);
     expect(Object.keys(freshProposals.ticks)).toHaveLength(0);
     expect(freshProposals.newHabits).toHaveLength(0);
@@ -115,7 +115,7 @@ describe("Chat integration flow", () => {
     const p2 = extractProposalsFromText(msg2, HABITS);
     expect(p2.ticks).toHaveProperty("h2");
 
-    const combined: Proposals = {
+    const combined: ProposalsData = {
       ticks: { ...p1.ticks, ...p2.ticks },
       newHabits: [...p1.newHabits, ...p2.newHabits],
     };

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { generateAssistantResponse, extractProposalsFromText } from "../lib/chat";
-import type { Habit, Proposals } from "otter-ds/lib/types";
+import type { Habit, ProposalsData } from "otter-ds/lib/types";
 
 const HABITS: Habit[] = [
   { id: "h1", name: "Workout", emoji: "🏃", kind: "binary", aliases: ["workout", "gym", "exercise"] },
@@ -10,7 +10,7 @@ const HABITS: Habit[] = [
 
 describe("generateAssistantResponse", () => {
   it("returns empty state message when no proposals detected", () => {
-    const proposals: Proposals = { ticks: {}, newHabits: [] };
+    const proposals: ProposalsData = { ticks: {}, newHabits: [] };
     const response = generateAssistantResponse("had a normal day", proposals, HABITS);
     expect(response).toContain("Got it");
     expect(typeof response).toBe("string");
@@ -18,7 +18,7 @@ describe("generateAssistantResponse", () => {
   });
 
   it("mentions detected habits when ticks are found", () => {
-    const proposals: Proposals = {
+    const proposals: ProposalsData = {
       ticks: { h1: { confidence: 0.8, evidence: "went to the gym" } },
       newHabits: [],
     };
@@ -27,7 +27,7 @@ describe("generateAssistantResponse", () => {
   });
 
   it("mentions multiple detected habits", () => {
-    const proposals: Proposals = {
+    const proposals: ProposalsData = {
       ticks: {
         h1: { confidence: 0.8, evidence: "gym" },
         h3: { confidence: 0.7, evidence: "meditated" },
@@ -40,7 +40,7 @@ describe("generateAssistantResponse", () => {
   });
 
   it("mentions new habit suggestions", () => {
-    const proposals: Proposals = {
+    const proposals: ProposalsData = {
       ticks: {},
       newHabits: [{ name: "Walk", emoji: "🚶", kind: "binary", confidence: 0.8 }],
     };
@@ -49,7 +49,7 @@ describe("generateAssistantResponse", () => {
   });
 
   it("combines tick and new habit mentions", () => {
-    const proposals: Proposals = {
+    const proposals: ProposalsData = {
       ticks: { h1: { confidence: 0.8 } },
       newHabits: [{ name: "Cook", emoji: "🍳", kind: "binary", confidence: 0.75 }],
     };
