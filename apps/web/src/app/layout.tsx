@@ -5,6 +5,7 @@ import "@/otter-ds/styles/globals.css";
 import "@/otter-ds/styles/components.css";
 import "./pwa.css";
 import { ServiceWorkerRegistration } from "./components/ServiceWorkerRegistration";
+import { AuthProvider } from "@/lib/auth";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -51,7 +52,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${newsreader.variable}`}>
       <body>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
         <ServiceWorkerRegistration />
       </body>
     </html>
