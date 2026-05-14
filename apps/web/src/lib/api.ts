@@ -1,16 +1,11 @@
 import type { Habit, LogMap } from "otter-ds/lib/types";
+import { authFetch, getStoredToken } from "./auth-fetch";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+export { getStoredToken } from "./auth-fetch";
 
-export async function apiGet<T>(path: string, token?: string): Promise<T | null> {
+export async function apiGet<T>(path: string): Promise<T | null> {
   try {
-    const res = await fetch(`${API_BASE}${path}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    });
+    const res = await authFetch(path, getStoredToken());
     if (!res.ok) return null;
     return res.json();
   } catch {
@@ -18,16 +13,9 @@ export async function apiGet<T>(path: string, token?: string): Promise<T | null>
   }
 }
 
-export async function apiPost<T>(path: string, body: unknown, token?: string): Promise<T | null> {
+export async function apiPost<T>(path: string, body: unknown): Promise<T | null> {
   try {
-    const res = await fetch(`${API_BASE}${path}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify(body),
-    });
+    const res = await authFetch(path, getStoredToken(), { method: "POST", body });
     if (!res.ok) return null;
     return res.json();
   } catch {
@@ -35,20 +23,22 @@ export async function apiPost<T>(path: string, body: unknown, token?: string): P
   }
 }
 
-export async function apiPatch<T>(path: string, body: unknown, token?: string): Promise<T | null> {
+export async function apiPatch<T>(path: string, body: unknown): Promise<T | null> {
   try {
-    const res = await fetch(`${API_BASE}${path}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify(body),
-    });
+    const res = await authFetch(path, getStoredToken(), { method: "PATCH", body });
     if (!res.ok) return null;
     return res.json();
   } catch {
     return null;
+  }
+}
+
+export async function apiDelete(path: string): Promise<boolean> {
+  try {
+    const res = await authFetch(path, getStoredToken(), { method: "DELETE" });
+    return res.ok;
+  } catch {
+    return false;
   }
 }
 
@@ -71,8 +61,8 @@ interface ApiLog {
   value: number;
 }
 
-export async function fetchHabits(token?: string): Promise<Habit[]> {
-  const data = await apiGet<{ habits: ApiHabit[] }>("/api/habits", token);
+export async function fetchHabits(): Promise<Habit[]> {
+  const data = await apiGet<{ habits: ApiHabit[] }>("/api/habits");
   if (!data?.habits) return [];
   return data.habits.map((h) => ({
     id: h.id,
@@ -83,10 +73,9 @@ export async function fetchHabits(token?: string): Promise<Habit[]> {
   }));
 }
 
-export async function fetchStreaks(token?: string): Promise<Record<string, number>> {
+export async function fetchStreaks(): Promise<Record<string, number>> {
   const data = await apiGet<{ streaks: { habitId: string; currentStreak: number }[] }>(
-    "/api/habits/streaks",
-    token
+    "/api/habits/streaks"
   );
   if (!data?.streaks) return {};
   const map: Record<string, number> = {};
@@ -96,11 +85,8 @@ export async function fetchStreaks(token?: string): Promise<Record<string, numbe
   return map;
 }
 
-export async function fetchLogsForDate(
-  token: string | undefined,
-  date: string
-): Promise<ApiLog[]> {
-  const data = await apiGet<{ logs: ApiLog[] }>(`/api/habits/logs?date=${date}`, token);
+export async function fetchLogsForDate(date: string): Promise<ApiLog[]> {
+  const data = await apiGet<{ logs: ApiLog[] }>(`/api/habits/logs?date=${date}`);
   return data?.logs ?? [];
 }
 
@@ -119,20 +105,18 @@ export function buildLogMap(
 }
 
 export async function toggleHabit(
-  token: string | undefined,
   habitId: string,
   date: string
 ): Promise<{ toggled: boolean } | null> {
-  return apiPost<{ toggled: boolean }>(`/api/habits/${habitId}/toggle`, { date }, token);
+  return apiPost<{ toggled: boolean }>(`/api/habits/${habitId}/toggle`, { date });
 }
 
 export async function setSession(
-  token: string | undefined,
   habitId: string,
   date: string,
   value: number
 ): Promise<{ log: ApiLog | null } | null> {
-  return apiPatch<{ log: ApiLog | null }>(`/api/habits/${habitId}/sessions`, { date, value }, token);
+  return apiPatch<{ log: ApiLog | null }>(`/api/habits/${habitId}/sessions`, { date, value });
 }
 
 interface ApiConversation {
@@ -152,67 +136,49 @@ interface ApiMessage {
   createdAt: string;
 }
 
-export async function fetchActiveConversation(
-  token?: string
-): Promise<ApiConversation | null> {
+export async function fetchActiveConversation(): Promise<ApiConversation | null> {
   const data = await apiGet<{ conversation: ApiConversation }>(
-    "/api/conversations/active",
-    token
+    "/api/conversations/active"
   );
   return data?.conversation ?? null;
 }
 
-export async function createConversation(
-  token: string | undefined,
-  date: string
-): Promise<ApiConversation | null> {
+export async function createConversation(date: string): Promise<ApiConversation | null> {
   const data = await apiPost<{ conversation: ApiConversation }>(
     "/api/conversations",
-    { date },
-    token
+    { date }
   );
   return data?.conversation ?? null;
 }
 
-export async function fetchMessages(
-  token: string | undefined,
-  conversationId: string
-): Promise<ApiMessage[]> {
+export async function fetchMessages(conversationId: string): Promise<ApiMessage[]> {
   const data = await apiGet<{ messages: ApiMessage[] }>(
-    `/api/conversations/${conversationId}/messages`,
-    token
+    `/api/conversations/${conversationId}/messages`
   );
   return data?.messages ?? [];
 }
 
 export async function sendMessage(
-  token: string | undefined,
   conversationId: string,
   content: string,
   role: "user" | "assistant"
 ): Promise<ApiMessage | null> {
   const data = await apiPost<{ message: ApiMessage }>(
     `/api/conversations/${conversationId}/messages`,
-    { content, role },
-    token
+    { content, role }
   );
   return data?.message ?? null;
 }
 
-export async function wrapConversation(
-  token: string | undefined,
-  conversationId: string
-): Promise<boolean> {
+export async function wrapConversation(conversationId: string): Promise<boolean> {
   const data = await apiPost<{ conversation: unknown }>(
     `/api/conversations/${conversationId}/wrap`,
-    {},
-    token
+    {}
   );
   return data !== null;
 }
 
 export async function createHabit(
-  token: string | undefined,
   name: string,
   emoji: string,
   kind: "binary" | "session",
@@ -220,8 +186,7 @@ export async function createHabit(
 ): Promise<Habit | null> {
   const data = await apiPost<{ habit: ApiHabit }>(
     "/api/habits",
-    { name, emoji, kind, aliases },
-    token
+    { name, emoji, kind, aliases }
   );
   if (!data?.habit) return null;
   return {
@@ -242,39 +207,23 @@ export interface AiConfig {
   updatedAt: string;
 }
 
-export async function fetchAiConfigs(token?: string): Promise<AiConfig[]> {
-  const data = await apiGet<{ configs: AiConfig[] }>("/api/settings/ai", token);
+export async function fetchAiConfigs(): Promise<AiConfig[]> {
+  const data = await apiGet<{ configs: AiConfig[] }>("/api/settings/ai");
   return data?.configs ?? [];
 }
 
 export async function saveAiConfig(
-  token: string | undefined,
   provider: string,
   apiKey: string,
   modelName?: string
 ): Promise<AiConfig | null> {
   const data = await apiPost<{ config: AiConfig }>(
     "/api/settings/ai",
-    { provider, apiKey, modelName },
-    token
+    { provider, apiKey, modelName }
   );
   return data?.config ?? null;
 }
 
-export async function deleteAiConfig(
-  token: string | undefined,
-  provider: string
-): Promise<boolean> {
-  try {
-    const res = await fetch(`${API_BASE}/api/settings/ai/${provider}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
+export async function deleteAiConfig(provider: string): Promise<boolean> {
+  return apiDelete(`/api/settings/ai/${provider}`);
 }

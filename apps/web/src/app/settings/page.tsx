@@ -56,7 +56,6 @@ export default function SettingsPage() {
     setSuccess(null);
 
     const result = await saveAiConfig(
-      undefined,
       provider,
       apiKey,
       modelName || undefined
@@ -74,7 +73,7 @@ export default function SettingsPage() {
   }
 
   async function handleDelete(providerName: string) {
-    const ok = await deleteAiConfig(undefined, providerName);
+    const ok = await deleteAiConfig(providerName);
     if (ok) {
       setSuccess(`${providerName} provider removed`);
       await loadConfigs();

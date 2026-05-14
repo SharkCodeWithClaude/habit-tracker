@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { CalendarDay, HeatmapEntry } from "@habit-tracker/shared";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+import { apiGet } from "@/lib/api";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -39,13 +38,8 @@ export default function CalendarPage() {
     setLoading(true);
     setError(null);
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const headers: Record<string, string> = {};
-      if (token) headers["Authorization"] = `Bearer ${token}`;
-
-      const res = await fetch(`${API_BASE}/api/habits/calendar?month=${m}`, { headers });
-      if (!res.ok) throw new Error(`Calendar fetch failed: ${res.status}`);
-      const data = await res.json();
+      const data = await apiGet<{ days: CalendarDay[] }>(`/api/habits/calendar?month=${m}`);
+      if (!data) throw new Error("Calendar fetch failed");
       setDays(data.days);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load calendar");
@@ -57,13 +51,8 @@ export default function CalendarPage() {
 
   const fetchHeatmap = useCallback(async () => {
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const headers: Record<string, string> = {};
-      if (token) headers["Authorization"] = `Bearer ${token}`;
-
-      const res = await fetch(`${API_BASE}/api/habits/heatmap?weeks=18`, { headers });
-      if (!res.ok) return;
-      const data = await res.json();
+      const data = await apiGet<{ heatmap: HeatmapEntry[] }>("/api/habits/heatmap?weeks=18");
+      if (!data) return;
       setHeatmap(data.heatmap);
     } catch {
       // heatmap is non-critical

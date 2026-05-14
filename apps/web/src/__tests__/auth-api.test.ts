@@ -4,8 +4,17 @@ import { authFetch, AUTH_EVENTS } from "../lib/auth-fetch";
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
 
+const mockLocalStorage: Record<string, string> = {};
+vi.stubGlobal("localStorage", {
+  getItem: (key: string) => mockLocalStorage[key] ?? null,
+  setItem: (key: string, value: string) => { mockLocalStorage[key] = value; },
+  removeItem: (key: string) => { delete mockLocalStorage[key]; },
+  clear: () => { for (const k of Object.keys(mockLocalStorage)) delete mockLocalStorage[k]; },
+});
+
 beforeEach(() => {
   mockFetch.mockReset();
+  localStorage.clear();
 });
 
 describe("authFetch", () => {
@@ -34,6 +43,54 @@ describe("authFetch", () => {
     mockFetch.mockResolvedValueOnce(mockRes);
     const res = await authFetch("/api/habits", "tok");
     expect(res).toBe(mockRes);
+  });
+
+  it("defaults to GET method", async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({}) });
+    await authFetch("/api/habits", "tok");
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ method: "GET" })
+    );
+  });
+
+  it("supports POST method with body", async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({}) });
+    await authFetch("/api/habits/1/toggle", "tok", {
+      method: "POST",
+      body: { date: "2026-05-14" },
+    });
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/api/habits/1/toggle"),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ date: "2026-05-14" }),
+      })
+    );
+  });
+
+  it("supports PATCH method with body", async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({}) });
+    await authFetch("/api/habits/1/sessions", "tok", {
+      method: "PATCH",
+      body: { date: "2026-05-14", value: 3 },
+    });
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ date: "2026-05-14", value: 3 }),
+      })
+    );
+  });
+
+  it("supports DELETE method", async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({}) });
+    await authFetch("/api/settings/ai/claude", "tok", { method: "DELETE" });
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ method: "DELETE" })
+    );
   });
 
   describe("401 handling", () => {
@@ -72,6 +129,40 @@ describe("authFetch", () => {
 
       const retryCall = mockFetch.mock.calls[2];
       expect(retryCall[1].headers.Authorization).toBe("Bearer refreshed-tok");
+    });
+
+    it("retries POST with body after refresh", async () => {
+      mockFetch
+        .mockResolvedValueOnce({ ok: false, status: 401 })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ accessToken: "refreshed-tok" }),
+        })
+        .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({}) });
+
+      await authFetch("/api/habits/1/toggle", "old-tok", {
+        method: "POST",
+        body: { date: "2026-05-14" },
+      });
+
+      const retryCall = mockFetch.mock.calls[2];
+      expect(retryCall[1].method).toBe("POST");
+      expect(retryCall[1].body).toBe(JSON.stringify({ date: "2026-05-14" }));
+      expect(retryCall[1].headers.Authorization).toBe("Bearer refreshed-tok");
+    });
+
+    it("saves refreshed token to localStorage", async () => {
+      mockFetch
+        .mockResolvedValueOnce({ ok: false, status: 401 })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ accessToken: "saved-tok" }),
+        })
+        .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({}) });
+
+      await authFetch("/api/habits", "old-tok");
+
+      expect(localStorage.getItem("access_token")).toBe("saved-tok");
     });
 
     it("emits unauthorized event when refresh fails", async () => {

@@ -3,6 +3,7 @@ import {
   apiGet,
   apiPost,
   apiPatch,
+  apiDelete,
   fetchHabits,
   fetchStreaks,
   fetchLogsForDate,
@@ -23,17 +24,27 @@ import {
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
 
+const mockLocalStorage: Record<string, string> = {};
+vi.stubGlobal("localStorage", {
+  getItem: (key: string) => mockLocalStorage[key] ?? null,
+  setItem: (key: string, value: string) => { mockLocalStorage[key] = value; },
+  removeItem: (key: string) => { delete mockLocalStorage[key]; },
+  clear: () => { for (const k of Object.keys(mockLocalStorage)) delete mockLocalStorage[k]; },
+});
+
 beforeEach(() => {
   mockFetch.mockReset();
+  localStorage.clear();
+  localStorage.setItem("access_token", "tok123");
 });
 
 describe("apiGet / apiPost / apiPatch", () => {
-  it("apiGet sends GET with auth header", async () => {
+  it("apiGet sends GET with auth header from stored token", async () => {
     mockFetch.mockResolvedValue({
       ok: true,
       json: async () => ({ data: 1 }),
     });
-    const result = await apiGet("/api/habits", "tok123");
+    const result = await apiGet("/api/habits");
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("/api/habits"),
       expect.objectContaining({
@@ -51,7 +62,7 @@ describe("apiGet / apiPost / apiPatch", () => {
       ok: true,
       json: async () => ({ toggled: true }),
     });
-    const result = await apiPost("/api/habits/1/toggle", { date: "2026-05-10" }, "tok");
+    const result = await apiPost("/api/habits/1/toggle", { date: "2026-05-10" });
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("/api/habits/1/toggle"),
       expect.objectContaining({
@@ -63,14 +74,14 @@ describe("apiGet / apiPost / apiPatch", () => {
   });
 
   it("apiGet returns null on non-ok response", async () => {
-    mockFetch.mockResolvedValue({ ok: false, status: 401 });
-    const result = await apiGet("/api/habits", "bad");
+    mockFetch.mockResolvedValue({ ok: false, status: 500 });
+    const result = await apiGet("/api/habits");
     expect(result).toBeNull();
   });
 
   it("apiGet returns null on network error", async () => {
     mockFetch.mockRejectedValue(new Error("network"));
-    const result = await apiGet("/api/habits", "tok");
+    const result = await apiGet("/api/habits");
     expect(result).toBeNull();
   });
 });
@@ -109,7 +120,7 @@ describe("fetchHabits", () => {
       }),
     });
 
-    const habits = await fetchHabits("tok");
+    const habits = await fetchHabits();
     expect(habits).toEqual([
       { id: "abc-123", name: "Workout", emoji: "🏃", kind: "binary", aliases: ["workout", "gym"] },
       { id: "def-456", name: "Read", emoji: "📖", kind: "session", aliases: ["read"] },
@@ -118,7 +129,7 @@ describe("fetchHabits", () => {
 
   it("returns empty array on failure", async () => {
     mockFetch.mockResolvedValue({ ok: false, status: 500 });
-    const habits = await fetchHabits("tok");
+    const habits = await fetchHabits();
     expect(habits).toEqual([]);
   });
 });
@@ -135,7 +146,7 @@ describe("fetchStreaks", () => {
       }),
     });
 
-    const streaks = await fetchStreaks("tok");
+    const streaks = await fetchStreaks();
     expect(streaks).toEqual({ "abc-123": 5, "def-456": 0 });
   });
 });
@@ -152,7 +163,7 @@ describe("fetchLogsForDate", () => {
       }),
     });
 
-    const logs = await fetchLogsForDate("tok", "2026-05-10");
+    const logs = await fetchLogsForDate("2026-05-10");
     expect(logs).toEqual([
       { habitId: "abc-123", date: "2026-05-10", value: 1 },
       { habitId: "def-456", date: "2026-05-10", value: 3 },
@@ -202,7 +213,7 @@ describe("toggleHabit", () => {
       ok: true,
       json: async () => ({ toggled: true }),
     });
-    const result = await toggleHabit("tok", "abc-123", "2026-05-10");
+    const result = await toggleHabit("abc-123", "2026-05-10");
     expect(result).toEqual({ toggled: true });
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("/api/habits/abc-123/toggle"),
@@ -217,7 +228,7 @@ describe("setSession", () => {
       ok: true,
       json: async () => ({ log: { habitId: "def-456", date: "2026-05-10", value: 3 } }),
     });
-    const result = await setSession("tok", "def-456", "2026-05-10", 3);
+    const result = await setSession("def-456", "2026-05-10", 3);
     expect(result).toEqual({ log: { habitId: "def-456", date: "2026-05-10", value: 3 } });
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("/api/habits/def-456/sessions"),
@@ -240,7 +251,7 @@ describe("fetchActiveConversation", () => {
       ok: true,
       json: async () => ({ conversation: conv }),
     });
-    const result = await fetchActiveConversation("tok");
+    const result = await fetchActiveConversation();
     expect(result).toEqual(conv);
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("/api/conversations/active"),
@@ -250,7 +261,7 @@ describe("fetchActiveConversation", () => {
 
   it("returns null when no active conversation", async () => {
     mockFetch.mockResolvedValue({ ok: false, status: 404 });
-    const result = await fetchActiveConversation("tok");
+    const result = await fetchActiveConversation();
     expect(result).toBeNull();
   });
 });
@@ -269,7 +280,7 @@ describe("createConversation", () => {
       ok: true,
       json: async () => ({ conversation: conv }),
     });
-    const result = await createConversation("tok", "2026-05-10");
+    const result = await createConversation("2026-05-10");
     expect(result).toEqual(conv);
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("/api/conversations"),
@@ -282,7 +293,7 @@ describe("createConversation", () => {
 
   it("returns null on failure", async () => {
     mockFetch.mockResolvedValue({ ok: false, status: 500 });
-    const result = await createConversation("tok", "2026-05-10");
+    const result = await createConversation("2026-05-10");
     expect(result).toBeNull();
   });
 });
@@ -297,7 +308,7 @@ describe("fetchMessages", () => {
       ok: true,
       json: async () => ({ messages }),
     });
-    const result = await fetchMessages("tok", "conv-1");
+    const result = await fetchMessages("conv-1");
     expect(result).toEqual(messages);
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("/api/conversations/conv-1/messages"),
@@ -307,7 +318,7 @@ describe("fetchMessages", () => {
 
   it("returns empty array on failure", async () => {
     mockFetch.mockResolvedValue({ ok: false, status: 404 });
-    const result = await fetchMessages("tok", "conv-1");
+    const result = await fetchMessages("conv-1");
     expect(result).toEqual([]);
   });
 });
@@ -319,7 +330,7 @@ describe("sendMessage", () => {
       ok: true,
       json: async () => ({ message: msg }),
     });
-    const result = await sendMessage("tok", "conv-1", "Did yoga", "user");
+    const result = await sendMessage("conv-1", "Did yoga", "user");
     expect(result).toEqual(msg);
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("/api/conversations/conv-1/messages"),
@@ -332,7 +343,7 @@ describe("sendMessage", () => {
 
   it("returns null on failure", async () => {
     mockFetch.mockResolvedValue({ ok: false, status: 400 });
-    const result = await sendMessage("tok", "conv-1", "test", "user");
+    const result = await sendMessage("conv-1", "test", "user");
     expect(result).toBeNull();
   });
 });
@@ -343,7 +354,7 @@ describe("wrapConversation", () => {
       ok: true,
       json: async () => ({ conversation: { id: "conv-1", endedAt: "2026-05-10T10:00:00Z" } }),
     });
-    const result = await wrapConversation("tok", "conv-1");
+    const result = await wrapConversation("conv-1");
     expect(result).toBe(true);
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("/api/conversations/conv-1/wrap"),
@@ -353,7 +364,7 @@ describe("wrapConversation", () => {
 
   it("returns false on failure", async () => {
     mockFetch.mockResolvedValue({ ok: false, status: 404 });
-    const result = await wrapConversation("tok", "conv-1");
+    const result = await wrapConversation("conv-1");
     expect(result).toBe(false);
   });
 });
@@ -371,7 +382,7 @@ describe("createHabit", () => {
       ok: true,
       json: async () => ({ habit }),
     });
-    const result = await createHabit("tok", "Walk", "🚶", "binary", ["walk", "walking"]);
+    const result = await createHabit("Walk", "🚶", "binary", ["walk", "walking"]);
     expect(result).toEqual({ id: "hab-new", name: "Walk", emoji: "🚶", kind: "binary", aliases: ["walk", "walking"] });
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("/api/habits"),
@@ -384,7 +395,7 @@ describe("createHabit", () => {
 
   it("returns null on failure", async () => {
     mockFetch.mockResolvedValue({ ok: false, status: 500 });
-    const result = await createHabit("tok", "Walk", "🚶", "binary", []);
+    const result = await createHabit("Walk", "🚶", "binary", []);
     expect(result).toBeNull();
   });
 });
@@ -398,7 +409,7 @@ describe("fetchAiConfigs", () => {
       ok: true,
       json: async () => ({ configs }),
     });
-    const result = await fetchAiConfigs("tok");
+    const result = await fetchAiConfigs();
     expect(result).toEqual(configs);
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("/api/settings/ai"),
@@ -408,7 +419,7 @@ describe("fetchAiConfigs", () => {
 
   it("returns empty array on failure", async () => {
     mockFetch.mockResolvedValue({ ok: false, status: 401 });
-    const result = await fetchAiConfigs("tok");
+    const result = await fetchAiConfigs();
     expect(result).toEqual([]);
   });
 });
@@ -420,7 +431,7 @@ describe("saveAiConfig", () => {
       ok: true,
       json: async () => ({ config }),
     });
-    const result = await saveAiConfig("tok", "openai", "sk-key", "gpt-4o");
+    const result = await saveAiConfig("openai", "sk-key", "gpt-4o");
     expect(result).toEqual(config);
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("/api/settings/ai"),
@@ -433,7 +444,7 @@ describe("saveAiConfig", () => {
 
   it("returns null on failure", async () => {
     mockFetch.mockResolvedValue({ ok: false, status: 400 });
-    const result = await saveAiConfig("tok", "openai", "bad", undefined);
+    const result = await saveAiConfig("openai", "bad", undefined);
     expect(result).toBeNull();
   });
 });
@@ -441,7 +452,7 @@ describe("saveAiConfig", () => {
 describe("deleteAiConfig", () => {
   it("deletes a provider config", async () => {
     mockFetch.mockResolvedValue({ ok: true, json: async () => ({ deleted: true }) });
-    const result = await deleteAiConfig("tok", "claude");
+    const result = await deleteAiConfig("claude");
     expect(result).toBe(true);
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("/api/settings/ai/claude"),
@@ -451,7 +462,7 @@ describe("deleteAiConfig", () => {
 
   it("returns false on failure", async () => {
     mockFetch.mockResolvedValue({ ok: false, status: 404 });
-    const result = await deleteAiConfig("tok", "groq");
+    const result = await deleteAiConfig("groq");
     expect(result).toBe(false);
   });
 });

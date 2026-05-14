@@ -60,7 +60,7 @@ export default function TodayPage() {
       setHabits(h);
       setStreaks(s);
 
-      const todayLogs = await fetchLogsForDate(undefined, todayKey);
+      const todayLogs = await fetchLogsForDate(todayKey);
       if (cancelled) return;
       setLogs(buildLogMap(todayLogs, h));
       setLoading(false);
@@ -77,7 +77,7 @@ export default function TodayPage() {
       if (active && active.date === todayKey) {
         setConversationId(active.id);
         if (active.tokenCount >= TOKEN_BUDGET) setShouldWrap(true);
-        const msgs = await fetchMessages(undefined, active.id);
+        const msgs = await fetchMessages(active.id);
         if (cancelled) return;
         setMessages(msgs.map((m) => ({
           id: m.id,
@@ -86,7 +86,7 @@ export default function TodayPage() {
           createdAt: m.createdAt,
         })));
       } else {
-        const conv = await createConversation(undefined, todayKey);
+        const conv = await createConversation(todayKey);
         if (cancelled) return;
         if (conv) setConversationId(conv.id);
       }
@@ -99,7 +99,7 @@ export default function TodayPage() {
     if (habits.length === 0) return;
     let cancelled = false;
     async function loadLogs() {
-      const dateLogs = await fetchLogsForDate(undefined, selectedKey);
+      const dateLogs = await fetchLogsForDate(selectedKey);
       if (cancelled) return;
       setLogs((prev) => ({
         ...prev,
@@ -117,11 +117,11 @@ export default function TodayPage() {
   };
 
   const handleToggle = async (habitId: string, dk: string) => {
-    await toggleHabit(undefined, habitId, dk);
+    await toggleHabit(habitId, dk);
   };
 
   const handleAddSession = async (habitId: string, dk: string, newCount: number) => {
-    await setSession(undefined, habitId, dk, newCount);
+    await setSession(habitId, dk, newCount);
   };
 
   const handleSendMessage = async (text: string) => {
@@ -136,7 +136,7 @@ export default function TodayPage() {
     setMessages((prev) => [...prev, optimisticMsg]);
     setThinking(true);
 
-    await sendMessage(undefined, conversationId, text, "user");
+    await sendMessage(conversationId, text, "user");
 
     const detected = extractProposalsFromText(text, habits);
     const responseText = generateAssistantResponse(text, detected, habits);
@@ -151,14 +151,14 @@ export default function TodayPage() {
     setMessages((prev) => [...prev, assistantMsg]);
     setThinking(false);
 
-    await sendMessage(undefined, conversationId, responseText, "assistant");
+    await sendMessage(conversationId, responseText, "assistant");
   };
 
   const handleNewSession = async () => {
     if (conversationId) {
-      await wrapConversation(undefined, conversationId);
+      await wrapConversation(conversationId);
     }
-    const conv = await createConversation(undefined, todayKey);
+    const conv = await createConversation(todayKey);
     if (conv) {
       setConversationId(conv.id);
       setMessages([]);
@@ -178,11 +178,11 @@ export default function TodayPage() {
       const current = Number(logs[key]) || 0;
       const newVal = current + sessions;
       setLogs((prev) => ({ ...prev, [key]: newVal }));
-      await setSession(undefined, habitId, dk, newVal);
+      await setSession(habitId, dk, newVal);
     } else {
       const key = `${habitId}|${dk}`;
       setLogs((prev) => ({ ...prev, [key]: true }));
-      await toggleHabit(undefined, habitId, dk);
+      await toggleHabit(habitId, dk);
     }
 
     setProposals((prev) => {
@@ -200,7 +200,6 @@ export default function TodayPage() {
 
   const handleAddHabit = async (nh: ProposalNewHabit) => {
     const newHabit = await createHabit(
-      undefined,
       nh.name,
       nh.emoji || "💡",
       nh.kind || "binary",
