@@ -109,9 +109,6 @@ importers:
       next:
         specifier: 16.2.4
         version: 16.2.4(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      otter-ds:
-        specifier: workspace:*
-        version: link:../../otter-ds
       react:
         specifier: 19.2.4
         version: 19.2.4
@@ -137,15 +134,6 @@ importers:
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
-
-  otter-ds:
-    dependencies:
-      react:
-        specifier: '>=18'
-        version: 19.2.4
-      react-dom:
-        specifier: '>=18'
-        version: 19.2.4(react@19.2.4)
 
   packages/shared:
     dependencies:

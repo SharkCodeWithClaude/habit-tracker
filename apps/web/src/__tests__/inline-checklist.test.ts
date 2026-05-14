@@ -4,7 +4,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import { act } from "react";
 
-import { InlineChecklist } from "otter-ds/components";
+import { InlineChecklist } from "@/otter-ds/components";
 
 let container: HTMLDivElement;
 let root: ReactDOM.Root;

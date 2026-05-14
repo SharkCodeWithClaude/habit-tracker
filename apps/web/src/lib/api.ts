@@ -1,4 +1,4 @@
-import type { Habit, LogMap } from "otter-ds/lib/types";
+import type { Habit, LogMap } from "@/otter-ds/lib/types";
 import { authFetch, getStoredToken } from "./auth-fetch";
 
 export { getStoredToken } from "./auth-fetch";

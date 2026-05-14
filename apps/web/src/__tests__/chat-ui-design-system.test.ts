@@ -3,7 +3,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 
 const css = readFileSync(
-  join(__dirname, "..", "..", "..", "..", "otter-ds", "styles", "components.css"),
+  join(__dirname, "..", "otter-ds", "styles", "components.css"),
   "utf-8"
 );
 

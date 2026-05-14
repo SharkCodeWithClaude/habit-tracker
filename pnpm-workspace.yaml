@@ -1,7 +1,6 @@
 packages:
   - "apps/*"
   - "packages/*"
-  - "otter-ds"
 allowBuilds:
   '@parcel/watcher': true
   better-sqlite3: true

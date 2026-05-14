@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Newsreader } from "next/font/google";
-import "otter-ds/styles/tokens.css";
-import "otter-ds/styles/globals.css";
-import "otter-ds/styles/components.css";
+import "@/otter-ds/styles/tokens.css";
+import "@/otter-ds/styles/globals.css";
+import "@/otter-ds/styles/components.css";
 import "./pwa.css";
 import { ServiceWorkerRegistration } from "./components/ServiceWorkerRegistration";
 import { AuthProvider } from "@/lib/auth";

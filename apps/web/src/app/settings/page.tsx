@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Sidebar } from "otter-ds/components/Sidebar";
-import Icon from "otter-ds/components/Icon";
+import { Sidebar } from "@/otter-ds/components/Sidebar";
+import Icon from "@/otter-ds/components/Icon";
 import { fetchAiConfigs, saveAiConfig, deleteAiConfig } from "@/lib/api";
 import type { AiConfig } from "@/lib/api";
 
