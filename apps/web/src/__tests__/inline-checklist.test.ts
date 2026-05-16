@@ -83,7 +83,7 @@ describe("InlineChecklist", () => {
     expect(onCreate).not.toHaveBeenCalled();
   });
 
-  it("shows created habit as a row after successful creation", async () => {
+  it("does not render created habits internally (parent handles display)", async () => {
     const onCreate = vi.fn().mockResolvedValue({
       id: "h1", name: "Meditate", emoji: "✨", kind: "binary",
     });
@@ -96,8 +96,7 @@ describe("InlineChecklist", () => {
     });
 
     const rows = getCreatedRows();
-    expect(rows.length).toBe(1);
-    expect(rows[0].textContent).toContain("Meditate");
+    expect(rows.length).toBe(0);
   });
 
   it("clears input and keeps it available after creation", async () => {
@@ -138,28 +137,18 @@ describe("InlineChecklist", () => {
       input2.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     });
 
-    const rows = getCreatedRows();
-    expect(rows.length).toBe(2);
-    expect(rows[0].textContent).toContain("Meditate");
-    expect(rows[1].textContent).toContain("Read");
     expect(onCreate).toHaveBeenCalledTimes(2);
+    expect(onCreate).toHaveBeenCalledWith("Meditate");
+    expect(onCreate).toHaveBeenCalledWith("Read");
   });
 
-  it("renders created rows with checkbox icons", async () => {
-    const onCreate = vi.fn().mockResolvedValue({
-      id: "h1", name: "Meditate", emoji: "✨", kind: "binary",
-    });
-    render(React.createElement(InlineChecklist, { onCreateHabit: onCreate }));
+  it("input row has unchecked checkbox icon (not pre-checked)", () => {
+    render(React.createElement(InlineChecklist, { onCreateHabit: vi.fn() }));
 
-    const input = getInput()!;
-    await act(async () => {
-      fireInputChange(input, "Meditate");
-      input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
-    });
-
-    const rows = getCreatedRows();
-    const checkbox = rows[0].querySelector(".otr-habit-check");
+    const inputRow = container.querySelector(".otr-inline-input-row");
+    const checkbox = inputRow?.querySelector(".otr-habit-check");
     expect(checkbox).not.toBeNull();
+    expect(checkbox!.classList.contains("on")).toBe(false);
   });
 
   it("calls onCreateHabit on blur with non-empty input", async () => {
