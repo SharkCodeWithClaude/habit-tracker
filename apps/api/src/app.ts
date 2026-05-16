@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { createAuthRoutes } from "./routes/auth.routes.js";
 import { createHabitRoutes } from "./routes/habits.routes.js";
 import { createConversationRoutes } from "./routes/conversations.routes.js";
@@ -10,6 +11,11 @@ import type { AuthEnv } from "./middleware/auth.middleware.js";
 
 export function createApp(db?: Database) {
   const app = new Hono();
+
+  app.use("*", cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  }));
 
   app.get("/health", (c) => {
     return c.json({ status: "ok" });

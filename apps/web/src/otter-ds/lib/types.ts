@@ -1,7 +1,7 @@
 export type HabitKind = "binary" | "session";
 
 export interface Habit {
-  id: string;
+  id: number;
   name: string;
   emoji: string;
   kind: HabitKind;
@@ -26,7 +26,7 @@ export interface ProposalNewHabit {
   reason?: string;
 }
 
-export interface ProposalsData {
+export interface Proposals {
   ticks: Record<string, ProposalTick>;
   newHabits: ProposalNewHabit[];
 }

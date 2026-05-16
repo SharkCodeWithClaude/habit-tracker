@@ -1,0 +1,15 @@
+{
+  "name": "otter-ds",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Otter design system — Notion-simple habit-journal UI for Next.js",
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "main": "components/index.ts",
+  "types": "components/index.ts",
+  "sideEffects": [
+    "*.css"
+  ]
+}

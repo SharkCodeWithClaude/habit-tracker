@@ -2,13 +2,13 @@
 
 import * as React from "react";
 import Icon from "./Icon";
-import type { Habit, ProposalsData, ProposalNewHabit, ProposalTick } from "../lib/types";
+import type { Habit, Proposals as ProposalsT, ProposalNewHabit, ProposalTick } from "../lib/types";
 
 export interface ProposalsProps {
-  proposals: ProposalsData;
+  proposals: ProposalsT;
   habits: Habit[];
-  onConfirmTick: (habitId: string, info: ProposalTick) => void;
-  onDismissTick: (habitId: string) => void;
+  onConfirmTick: (habitId: number, info: ProposalTick) => void;
+  onDismissTick: (habitId: number) => void;
   onAddHabit: (h: ProposalNewHabit) => void;
   onDismissNew: (idx: number) => void;
   onClear: () => void;

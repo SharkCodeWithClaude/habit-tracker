@@ -4,12 +4,12 @@ import * as React from "react";
 import Icon from "./Icon";
 import { llmInfer } from "../lib/infer";
 import { useVoiceRecorder } from "../hooks/useVoiceRecorder";
-import type { Habit, ProposalsData } from "../lib/types";
+import type { Habit, Proposals } from "../lib/types";
 
 export interface JournalProps {
   value: string;
   onChange: (v: string) => void;
-  onProposals: (p: ProposalsData) => void;
+  onProposals: (p: Proposals) => void;
   habits: Habit[];
   date: Date;
   /** ms debounce before running inference */
