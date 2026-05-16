@@ -28,6 +28,7 @@ export function Chat({
   const [input, setInput] = React.useState("");
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
+  const isFocal = messages.length === 0 && !thinking;
 
   React.useEffect(() => {
     const el = scrollRef.current;
@@ -38,8 +39,9 @@ export function Chat({
     const el = inputRef.current;
     if (!el) return;
     el.style.height = "auto";
-    el.style.height = Math.min(el.scrollHeight, 120) + "px";
-  }, [input]);
+    const maxH = isFocal ? 200 : 120;
+    el.style.height = Math.min(el.scrollHeight, maxH) + "px";
+  }, [input, isFocal]);
 
   const handleSend = () => {
     const text = input.trim();
@@ -55,19 +57,44 @@ export function Chat({
     }
   };
 
+  if (isFocal) {
+    return (
+      <div className="otr-chat otr-chat-focal">
+        <div className="otr-chat-focal-input-area">
+          <textarea
+            ref={inputRef}
+            className="otr-chat-focal-input"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Tell me about your day..."
+            rows={3}
+          />
+          <div className="otr-chat-focal-actions">
+            <button
+              className="otr-chat-mic"
+              type="button"
+              title="Dictate"
+            >
+              <Icon.Mic style={{ width: 18, height: 18 }} />
+            </button>
+            <button
+              className="otr-chat-send"
+              onClick={handleSend}
+              disabled={!input.trim()}
+              title="Send"
+            >
+              <Icon.Chevron style={{ width: 16, height: 16, transform: "rotate(-90deg)" }} />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="otr-chat">
       <div className="otr-chat-messages" ref={scrollRef}>
-        {messages.length === 0 && !thinking && (
-          <div className="otr-chat-empty">
-            <div className="otr-chat-empty-icon">💬</div>
-            <p>Tell me about your day — I&apos;ll pick out the habits.</p>
-            <p className="otr-chat-empty-hint">
-              e.g. &quot;Went to the gym, then read for 30 minutes&quot;
-            </p>
-          </div>
-        )}
-
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -110,6 +137,13 @@ export function Chat({
           rows={1}
           disabled={thinking}
         />
+        <button
+          className="otr-chat-mic"
+          type="button"
+          title="Dictate"
+        >
+          <Icon.Mic style={{ width: 18, height: 18 }} />
+        </button>
         <button
           className="otr-chat-send"
           onClick={handleSend}
