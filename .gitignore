@@ -5,9 +5,6 @@ node_modules/
 .next/
 out/
 
-# database
-data/
-
 # build outputs
 dist/
 *.tsbuildinfo
@@ -27,4 +24,5 @@ package-lock.json
 *.pem
 .env*.local
 
+# sandcastle
 .sandcastle/

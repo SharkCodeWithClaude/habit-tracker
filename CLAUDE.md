@@ -5,50 +5,96 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev          # Start dev server (localhost:3000)
-npm run build        # Production build
-npm test             # Run all tests once
-npm run test:watch   # Tests in watch mode
-npm run typecheck    # tsc --noEmit
-npm run lint         # ESLint
-npx tsx scripts/seed.ts  # Seed sample habits
-```
+# Monorepo (run from root)
+pnpm dev              # Start all apps (web :3000, api :4000)
+pnpm build            # Build all apps
+pnpm test             # Run all tests
+pnpm typecheck        # Type check all packages
+pnpm lint             # Lint all packages
 
-Run a single test file: `npx vitest run src/db/__tests__/storage.test.ts`
+# Database (run from root or apps/api)
+pnpm --filter @habit-tracker/api db:push       # Push Drizzle schema to Postgres
+pnpm --filter @habit-tracker/api db:generate   # Generate migration files
+pnpm --filter @habit-tracker/api db:studio     # Open Drizzle Studio GUI
+
+# Infrastructure
+docker compose up -d  # Start Postgres 16 (port 5432, user=habit, db=habit_tracker)
+
+# Run a single test file
+pnpm --filter @habit-tracker/api exec vitest run __tests__/auth.test.ts
+pnpm --filter @habit-tracker/web exec vitest run src/__tests__/api.test.ts
+```
 
 ## Architecture
 
-Next.js App Router with SQLite (better-sqlite3). Server components fetch data, client components use React 19 `useOptimistic` for instant UI, server actions (`src/app/actions.ts`) handle mutations and call `revalidatePath()`.
+pnpm monorepo with Turborepo. Three workspaces:
 
-**Data layer** (`src/db/`):
-- `init.ts` — Schema, migrations, DB singleton (`getDb()`), WAL mode. Database lives at `data/habits.db` (auto-created, gitignored).
-- `storage.ts` — `HabitStorage` class for habit/day CRUD operations. All SQL behind typed methods.
-- `metrics.ts` — `HabitMetrics` class for derived computations: streaks, heatmaps, weekly reviews, completion counts. Uses `getStreaks()` for batch streak queries.
-- `types.ts` — Shared interfaces (`Habit`, `DayRecord`, `HeatmapDay`, etc.)
+```
+apps/api/       Hono backend (port 4000) — REST API, JWT auth, Drizzle + Postgres
+apps/web/       Next.js 16 frontend (port 3000) — App Router, Otter DS, PWA
+packages/shared/ Shared TypeScript types, Zod schemas, constants
+```
 
-**Routes** (`src/app/`):
-- `(notebook)/` — Route group sharing `NotebookShell` layout with tab navigation (Today, Calendar, Review). Client-side tab switching via `ViewNav` — no full-page refresh.
-- `(notebook)/page.tsx` — Today view (`force-dynamic`)
-- `(notebook)/calendar/page.tsx` — Monthly grid + 18-week per-habit heatmap
-- `(notebook)/review/page.tsx` — Weekly summary stats and reflection
-- `day/[date]/page.tsx` — Edit any past/future day
+### Backend (`apps/api/src/`)
 
-**Shared utilities** (`src/app/`):
-- `date-utils.ts` — `getToday()` for consistent YYYY-MM-DD formatting
+Layered architecture: **Routes → Services → Repositories → Drizzle/Postgres**
 
-**UI components** (`src/app/components/`):
-- `InkCheckbox` — Hand-drawn SVG checkbox with seeded jitter for per-instance variation
-- `DayView` — Reusable day display (shared between Today and day/[date])
-- `AutosaveTextarea` — Generic blur-to-save textarea (used for intentions, notes, reflections)
-- `HeatmapSection` — GitHub-style heatmap with pill chip filters
+- `routes/` — HTTP handlers. Parse request, validate with Zod, call service, return response. 5 modules: auth, habits, conversations, reviews, ai-config.
+- `services/` — Business logic and orchestration. 6 modules: auth, habit, conversation, inference, review, ai-config.
+- `repositories/` — Data access via Drizzle ORM. One per domain entity. Services never see SQL.
+- `providers/` — AI inference abstraction (Strategy pattern). Implementations: Claude, Gemini, Groq, OpenAI, Local (regex fallback). Factory in `provider.factory.ts`.
+- `middleware/` — JWT auth middleware. Extracts Bearer token, attaches `userId` to Hono context.
+- `db/schema.ts` — Drizzle schema definitions (10 tables). Migrations via `drizzle-kit`.
+- `config/` — Database connection (`database.ts`), environment variables (`env.ts`), AI provider config.
+- `lib/` — Auth utilities (JWT signing, bcrypt), encryption (AES-256-GCM for API keys).
+
+### Frontend (`apps/web/src/`)
+
+- `app/` — Next.js App Router pages: today (main dashboard), calendar, settings, login, register, offline fallback.
+- `lib/api.ts` — HTTP client wrapping `fetch` with auth headers. Domain-specific functions for habits, conversations, reviews.
+- `lib/auth.ts` — React AuthContext. JWT stored in localStorage + cookie. Auto-refresh on load.
+- `lib/chat.ts` — Chat logic, proposal extraction from AI responses.
+- `otter-ds/` — Notion-inspired design system. Components: Sidebar, DateStrip, Habits, Proposals, Journal, Login, Icon. Styles via CSS variables in `styles/tokens.css`.
+- `middleware.ts` — Auth redirect middleware.
+
+### Shared (`packages/shared/src/`)
+
+- `types/` — Domain interfaces: Habit, Conversation, Message, WeeklyReviewStats, ChatInput/Output, AiConfigPublic.
+- `schemas/` — Zod validation schemas for all API inputs (auth, habits, conversations, reviews, ai-config).
+- `constants/` — AI provider list, default model names.
 
 ## Key Patterns
 
-- **Habit deletion is archival**: soft delete via `archived_at` timestamp, not row removal.
-- **Habit colors**: `habitColor(habitId)` cycles through a 15-color palette in `habit-colors.ts`.
-- **Inline habit management**: habits are added/edited/archived directly in the Today view — no separate management page.
-- **Styling**: bullet journal aesthetic using CSS variables (`--paper`, `--ink`, `--ink-soft`, `--dot`, `--rule`, `--hl`) defined in `notebook.css`. Fonts: Caveat (handwritten) + Kalam.
+- **SOLID throughout**: Single-responsibility layering, open/closed via provider interfaces, dependency inversion with constructor injection.
+- **Strategy + Factory**: AI providers implement `InferenceProvider` interface. `createInferenceProvider(config)` returns correct implementation.
+- **Repository pattern**: All data access behind typed repository methods. Services orchestrate, repos query.
+- **Soft delete**: Habits archived via `archived_at` timestamp.
+- **Conversation sessions**: Auto-wrap when token budget exceeded (4000 tokens) or context shifts. Active session = `ended_at IS NULL`.
+- **Privacy-first AI**: Default is LocalProvider (regex, no API call). LLM providers opt-in via BYO API key, encrypted at rest with AES-256-GCM.
+- **JWT auth**: 15-min access tokens, 7-day refresh tokens (hashed in DB, rotated on use).
+
+## Database
+
+PostgreSQL 16 via Docker. Schema in `apps/api/src/db/schema.ts` (Drizzle ORM).
+
+10 tables: users, habits, habit_aliases, habit_logs, conversations, messages, weekly_reviews, user_ai_configs, refresh_tokens.
+
+All child entities cascade-delete from users. Habit IDs are integers, user IDs are UUIDs.
+
+## Styling
+
+Otter DS — Notion-inspired design system using CSS custom properties (`--color-*`, `--spacing-*`). Fonts: Inter (sans) + Newsreader (serif). Class prefix: `otr-`. No Tailwind in component code (plain CSS).
 
 ## Testing
 
-Vitest with tests colocated in `__tests__/` directories. Use `setupTestDb()` from `src/db/__tests__/test-helpers.ts` for isolated test databases — it handles creation, cleanup, and returns `{ db, storage, cleanup }`. Shared date helpers (`addDays`, `todayStr`) also live there.
+Vitest across all packages. API tests in `apps/api/__tests__/`, web tests in `apps/web/src/__tests__/`. Integration tests require Docker Postgres (skipped gracefully when unavailable). TDD workflow: red → green → refactor.
+
+## Environment Variables
+
+API requires: `DATABASE_URL`, `JWT_SECRET`, `ENCRYPTION_KEY`. Optional: `BCRYPT_ROUNDS` (default 10), `TOKEN_BUDGET_THRESHOLD` (default 4000), `CORS_ORIGIN`.
+
+Web requires: `NEXT_PUBLIC_API_URL` (default http://localhost:4000).
+
+## Docs
+
+Architecture decisions, database design, and PRD in `docs/v2/`.

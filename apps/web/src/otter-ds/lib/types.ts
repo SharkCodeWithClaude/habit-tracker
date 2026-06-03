@@ -31,6 +31,8 @@ export interface Proposals {
   newHabits: ProposalNewHabit[];
 }
 
+export type ProposalsData = Proposals;
+
 /** Optional global Claude bridge — defined by the host app if available */
 declare global {
   interface Window {

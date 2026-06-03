@@ -1,38 +1,18 @@
 {
   "name": "habit-tracker",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
   "packageManager": "pnpm@11.0.9",
   "scripts": {
     "dev": "turbo dev",
-    "dev:v1": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "test": "vitest run --config vitest.config.ts",
-    "test:watch": "vitest --config vitest.config.ts",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "better-sqlite3": "^11.0.0",
-    "next": "16.2.4",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "tsx": "^4.22.0"
+    "build": "turbo build",
+    "test": "turbo test",
+    "typecheck": "turbo typecheck",
+    "lint": "turbo lint"
   },
   "devDependencies": {
     "@ai-hero/sandcastle": "^0.5.10",
-    "@tailwindcss/postcss": "^4",
-    "@types/better-sqlite3": "^7.6.0",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.4",
-    "jsdom": "^29.1.1",
-    "tailwindcss": "^4",
     "turbo": "^2.5.0",
-    "typescript": "^5",
-    "vitest": "^3.2.0"
+    "typescript": "^5"
   }
 }

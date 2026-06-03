@@ -1,77 +1,66 @@
 # Habit Tracker
 
-A personal daily habit tracker styled as a hand-drawn bullet journal. Runs locally on your machine with SQLite storage.
+A privacy-first habit tracking app with optional AI-powered journaling. Built as a pnpm monorepo with a Hono API backend, Next.js frontend, and PostgreSQL database.
+
+## Quick Start
+
+```bash
+pnpm install
+docker compose up -d          # Start Postgres
+pnpm --filter @habit-tracker/api db:push   # Apply schema
+pnpm dev                      # API on :4000, Web on :3000
+```
+
+## Architecture
+
+```
+apps/api/         Hono REST API — JWT auth, Drizzle ORM, AI provider abstraction
+apps/web/         Next.js 16 — App Router, Otter DS (Notion-inspired), PWA
+packages/shared/  Shared TypeScript types, Zod schemas, constants
+```
 
 ## Features
 
-- **Today view** -- daily intention, habit checklist with hand-drawn ink checkboxes, streak badges, and freeform notes
-- **Calendar view** -- monthly grid with per-day completion dots, page-flip navigation, and an 18-week GitHub-style heatmap per habit with /30d counts and best streak stats
-- **Weekly Review** -- summary cards (completion %, total checks, most/least consistent habits), day-by-day strip, per-habit bar chart, and a reflection textarea
-- **Inline habit management** -- add habits with the "+" row, edit names by clicking, archive by clearing the name. No separate management screen
-- **Smooth navigation** -- client-side tab switching between Today, Calendar, and Review with no full-page refresh
+- **Daily habit tracking** — Binary (done/not done) and session-based (count) habits
+- **Conversational AI** — Chat about your day, habits inferred from conversation
+- **Privacy-first** — Default local regex inference (no API calls). BYO API key for Claude, Gemini, Groq, or OpenAI
+- **Calendar & heatmap** — Monthly grid view with completion history
+- **Weekly review** — Stats and reflection journaling
+- **PWA** — Installable, offline-capable
+- **JWT auth** — Email/password with refresh token rotation
 
 ## Tech Stack
 
-- Next.js 15 (App Router, server components, server actions)
-- React 19 with `useOptimistic` for instant UI feedback
-- better-sqlite3 (synchronous, file-based SQLite)
-- TypeScript end-to-end
-- Tailwind CSS 4
-- Vitest (87 tests)
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 16, React 19, Otter DS |
+| Backend | Hono, Hono RPC |
+| Database | PostgreSQL 16, Drizzle ORM |
+| Auth | JWT (access + refresh tokens), bcrypt |
+| AI | Claude, Gemini, Groq, OpenAI, Local regex |
+| Monorepo | pnpm workspaces, Turborepo |
+| Deployment | Railway (auto-deploy) |
 
-## Getting Started
-
-```bash
-npm install
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-### Seed sample habits
+## Development
 
 ```bash
-npx tsx scripts/seed.ts
+pnpm dev            # Start all apps
+pnpm test           # Run all tests
+pnpm typecheck      # Type check
+pnpm lint           # Lint
 ```
 
-## Scripts
+### Database
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Production build |
-| `npm test` | Run all tests |
-| `npm run test:watch` | Run tests in watch mode |
-| `npm run typecheck` | TypeScript type checking |
-| `npm run lint` | ESLint |
-
-## Project Structure
-
-```
-src/
-  db/
-    init.ts          -- schema, migrations, DB singleton
-    storage.ts       -- deep module: all SQL behind typed functions
-    types.ts         -- shared TypeScript interfaces
-  app/
-    (notebook)/      -- route group with shared notebook shell
-      page.tsx       -- Today view
-      calendar/      -- Calendar + heatmap view
-      review/        -- Weekly Review view
-    day/[date]/      -- Edit any past day
-    components/      -- shared UI components
-    actions.ts       -- server actions
-    view-persistence.ts -- localStorage view toggle
-    notebook.css     -- bullet journal design tokens and styles
+```bash
+docker compose up -d                              # Start Postgres
+pnpm --filter @habit-tracker/api db:push          # Push schema
+pnpm --filter @habit-tracker/api db:generate      # Generate migrations
+pnpm --filter @habit-tracker/api db:studio        # Drizzle Studio GUI
 ```
 
-## Design
+## Documentation
 
-The UI follows a bullet journal aesthetic with:
-- Caveat and Kalam Google Fonts for a handwritten feel
-- Dot-grid paper texture with paper noise overlay
-- Hand-drawn SVG checkboxes with seeded jitter for per-instance variation
-- Ink-style design tokens (`--paper`, `--ink`, `--ink-soft`, `--dot`, `--rule`, `--hl`)
-- Page-flip 3D animation for calendar month navigation
-
-Data is stored in `data/habits.db` (auto-created on first run, gitignored).
+- [Architecture](docs/v2/ARCHITECTURE.md)
+- [Database Design](docs/v2/DATABASE.md)
+- [Product Requirements](docs/v2/PRD.md)

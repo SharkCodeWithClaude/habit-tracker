@@ -63,6 +63,9 @@ export const Sparkle = (p: IconProps) => (
 export const Plus = (p: IconProps) => (
   <svg {...base} strokeWidth={1.6} {...p}><path d="M8 3v10M3 8h10"/></svg>
 );
+export const Send = (p: IconProps) => (
+  <svg {...base} strokeWidth={1.6} {...p}><path d="M2 8l12-5-4 12-3-5z"/><path d="M14 3l-7 5"/></svg>
+);
 
-const Icon = { Today, Inbox, Habits, Goals, Review, Settings, Search, Bell, Share, Star, Dots, Chevron, Mic, Check, X, Sparkle, Plus };
+const Icon = { Today, Inbox, Habits, Goals, Review, Settings, Search, Bell, Share, Star, Dots, Chevron, Mic, Check, X, Sparkle, Plus, Send };
 export default Icon;
